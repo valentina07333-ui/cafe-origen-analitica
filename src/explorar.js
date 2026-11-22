@@ -1,3 +1,4 @@
+const { ventas } = require("./datos");
 
 console.log("Cantidad de registros:", ventas.length);
 console.log("Primer registro:", ventas[0]);
