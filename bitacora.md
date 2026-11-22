@@ -124,3 +124,64 @@ Empieza con mayor en null.
 Resultado a mano: la venta mayor es el id 10, con 168000.
 
 Resultado del programa: totalVendido dio 985000 y ventaMayor dio el id 10. Coinciden con la traza a mano.
+
+## Preguntas que responde cada función
+
+valorVenta
+¿Qué recorro? Nada, recibe un solo registro.
+¿Qué filtro? Nada.
+¿Qué transformo? El registro en un número: cantidad por precio.
+¿Qué acumulo? Nada.
+¿Cómo agrupo? No agrupo.
+
+totalVendido y totalVendidoM
+¿Qué recorro? Todas las ventas.
+¿Qué filtro? Las que tienen cantidad mayor que 0.
+¿Qué transformo? Cada venta en su valor, con valorVenta.
+¿Qué acumulo? La suma de esos valores, empezando en 0.
+¿Cómo agrupo? No agrupo, el resultado es un solo número.
+
+unidadesVendidas y unidadesVendidasM
+¿Qué recorro? Todas las ventas.
+¿Qué filtro? Las que tienen cantidad mayor que 0.
+¿Qué transformo? Nada, uso la cantidad tal cual.
+¿Qué acumulo? La suma de las cantidades, empezando en 0.
+¿Cómo agrupo? No agrupo.
+
+ventaMayor
+¿Qué recorro? Todas las ventas.
+¿Qué filtro? Las que tienen cantidad mayor que 0.
+¿Qué transformo? Cada venta en su valor, solo para compararla.
+¿Qué acumulo? No sumo. Guardo el registro con el valor más alto visto hasta ahora, empezando en null.
+¿Cómo agrupo? No agrupo.
+
+ticketPromedio
+¿Qué recorro? Todas las ventas.
+¿Qué filtro? Las que tienen cantidad mayor que 0.
+¿Qué transformo? Cada venta en su valor.
+¿Qué acumulo? Dos cosas: la suma de valores y la cuenta de ventas válidas, ambas empezando en 0. Al final divido, y si no hay ventas válidas devuelvo 0.
+¿Cómo agrupo? No agrupo.
+
+ventasPorCiudad y ventasPorCiudadM
+¿Qué recorro? Todas las ventas.
+¿Qué filtro? Las que tienen cantidad mayor que 0 y cuya ciudad, sin espacios y en minúscula, es igual a la ciudad buscada.
+¿Qué transformo? Cada venta en su valor. También normalizo el texto de la ciudad para poder compararlo.
+¿Qué acumulo? La suma de los valores, empezando en 0.
+¿Cómo agrupo? No agrupo, filtro una sola ciudad.
+
+totalPorCiudad
+¿Qué recorro? Todas las ventas.
+¿Qué filtro? Las que tienen cantidad mayor que 0.
+¿Qué transformo? La ciudad, quitando espacios y dejando la primera letra en mayúscula; y cada venta en su valor.
+¿Qué acumulo? El total de cada ciudad, que empieza en 0 la primera vez que aparece.
+¿Cómo agrupo? Con un objeto cuyas claves son los nombres de ciudad normalizados.
+
+unidadesPorProducto
+¿Qué recorro? Todas las ventas.
+¿Qué filtro? Las que tienen cantidad mayor que 0.
+¿Qué transformo? Nada, uso la cantidad tal cual.
+¿Qué acumulo? Las unidades de cada producto, que empiezan en 0 la primera vez que aparece.
+¿Cómo agrupo? Con un objeto cuyas claves son los nombres de producto.
+
+topProductosPorValor
+¿Qué recorro? Primero todas las ventas, y después la lista de productos ya agrupados.
