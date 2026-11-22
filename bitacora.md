@@ -217,3 +217,38 @@ Prueba realizada: filtré el día 2026-09-07 con ventasDelDia, que devolvió un 
 Causa: la división no estaba protegida cuando la cantidad de ventas válidas es 0.
 
 Corrección: ticketPromedio revisa si la cantidad de ventas válidas es 0 y, en ese caso, devuelve 0 sin dividir. En mi versión el error ya no existe.
+
+## Predicción antes de medir
+
+Las tres funciones instrumentadas (totalVendidoConteo, ventaMayorConteo y totalPorCiudadConteo) recorren el arreglo una sola vez, con un solo ciclo, y por cada venta hacen un número fijo de pasos. No hay ciclos dentro de ciclos. Por eso creo que las operaciones crecen en línea recta: si n se multiplica por 10, las operaciones también se multiplican por 10.
+
+totalVendidoConteo: por cada venta cuenta una visita y una comparación (cantidad mayor que 0), es decir 2 por venta, 2n en total. Con n por 10 pasa de 2n a 20n. Se multiplica por 10.
+
+ventaMayorConteo: por cada venta cuenta la visita y la comparación de cantidad, y si la venta es válida suma una o dos comparaciones más. Son entre 2 y 4 por venta, así que entre 2n y 4n. Creo que también se multiplica por 10, o casi, porque la primera venta válida hace una comparación menos que las demás.
+
+totalPorCiudadConteo: por cada venta cuenta la visita, la comparación de cantidad y, si es válida, la comparación de si la ciudad ya existe. Son hasta 3 por venta, 3n en total. Se multiplica por 10. Las ciudades son pocas y no crecen con n, así que eso no cambia el conteo.
+
+Si al medir no me da más o menos 10 veces en las tres, mi razonamiento tiene un error.
+
+## Resultados y clasificación
+
+Medí con n = 100, 1.000, 10.000 y 100.000:
+
+| n | totalVendido | ventaMayor | totalPorCiudad | primeraVenta |
+|---|---|---|---|---|
+| 100 | 200 | 399 | 300 | 2 |
+| 1.000 | 2.000 | 3.999 | 3.000 | 2 |
+| 10.000 | 20.000 | 39.999 | 30.000 | 2 |
+| 100.000 | 200.000 | 399.999 | 300.000 | 2 |
+
+Mi predicción se cumplió: al multiplicar n por 10, las tres funciones que recorren el arreglo se multiplican por 10 y primeraVenta se queda igual. ventaMayor quedó en 4n - 1, el extremo alto de lo que había predicho, porque en los datos generados todas las ventas son válidas. primeraVenta no la había predicho porque la agregué después.
+
+totalVendidoConteo: O(n). Un solo ciclo, 2 operaciones por venta (2n).
+
+ventaMayorConteo: O(n). Un solo ciclo, hasta 4 operaciones por venta (4n - 1).
+
+totalPorCiudadConteo: O(n). Un solo ciclo, hasta 3 operaciones por venta (3n).
+
+primeraVentaConteo: O(1). No tiene ciclo y siempre hace 2 operaciones, sin importar n.
+
+Ninguna es O(n²): no hay ciclos dentro de ciclos, y si los hubiera, al multiplicar n por 10 las operaciones se multiplicarían por 100, no por 10.

@@ -129,6 +129,65 @@ function ventasDelDia(ventas, fecha) {
   }
   return delDia;
 }
+function totalVendidoConteo(ventas, contador) {
+  let total = 0;
+  for (const venta of ventas) {
+    contador.operaciones += 1; // visita
+    contador.operaciones += 1; // comparación: cantidad > 0
+    if (venta.cantidad > 0) {
+      total += valorVenta(venta);
+    }
+  }
+  return total;
+}
+
+function ventaMayorConteo(ventas, contador) {
+  let mayor = null;
+  for (const venta of ventas) {
+    contador.operaciones += 1; // visita
+    contador.operaciones += 1; // comparación: cantidad > 0
+    if (venta.cantidad > 0) {
+      contador.operaciones += 1; // comparación: mayor === null
+      if (mayor === null) {
+        mayor = venta;
+      } else {
+        contador.operaciones += 1; // comparación: valor contra el mayor
+        if (valorVenta(venta) > valorVenta(mayor)) {
+          mayor = venta;
+        }
+      }
+    }
+  }
+  return mayor;
+}
+
+function totalPorCiudadConteo(ventas, contador) {
+  const totales = {};
+  for (const venta of ventas) {
+    contador.operaciones += 1; // visita
+    contador.operaciones += 1; // comparación: cantidad > 0
+    if (venta.cantidad > 0) {
+      const ciudad = venta.ciudad.trim().toLowerCase();
+      const nombre = ciudad.charAt(0).toUpperCase() + ciudad.slice(1);
+      contador.operaciones += 1; // comparación: ciudad nueva
+      if (totales[nombre] === undefined) {
+        totales[nombre] = 0;
+      }
+      totales[nombre] += valorVenta(venta);
+    }
+  }
+  return totales;
+}
+
+function primeraVentaConteo(ventas, contador) {
+  contador.operaciones += 1; // comparación: hay ventas
+  if (ventas.length === 0) {
+    return null;
+  }
+  contador.operaciones += 1; // visita: la primera venta
+  return ventas[0];
+}
+
 module.exports = {
   valorVenta,
   totalVendido,
@@ -143,4 +202,9 @@ module.exports = {
   unidadesPorProducto,
   topProductosPorValor,
   ventasDelDia,
+  totalVendidoConteo,
+  ventaMayorConteo,
+  totalPorCiudadConteo,
+  primeraVentaConteo,
+
 };
