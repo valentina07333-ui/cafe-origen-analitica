@@ -1,21 +1,27 @@
-//DICCIONARIO DE DATOS
+# Bitácora - Café Origen Analítica
 
-Propiedad,Tipo & Significado 
+## Diccionario de datos
 
-ID(number): Identificador único de la venta. Va de 1 a 12, sin repetirse. 
+Cada registro de ventas es una línea de venta: un cliente compra una cantidad de un producto, en una ciudad y en un día concreto.
 
-Fecha(string): Fecha de la venta en formato "AAAA-MM-DD" (por ejemplo, "2026-09-01"). Es texto, no un objeto tipo date.
+id: número. Identifica cada registro. Va del 1 al 12 y no se repite.
 
-Cliente(string) Código del cliente que hizo la compra (por ejemplo, "C01"). Un mismo cliente puede aparecer en varias ventas.
+fecha: texto. Es el día de la venta, escrito como 2026-09-01. Lo dejo como texto porque por ahora no necesito hacer cálculos con fechas.
 
-Producto(string):Nombre del producto vendido, con su presentación (por ejemplo, "Origen Huila 500 g", "Prensa francesa"). 
+cliente: texto. Es el código del cliente, por ejemplo C01. Es un código y no un número, y un mismo cliente puede aparecer varias veces.
 
-Ciudad(string):Ciudad de la venta. Puede traer inconsistencias de escritura: la venta 5 tiene "medellín" en minúscula. 
+producto: texto. Es el nombre de lo que se vendió. En el café la presentación va dentro del nombre, por ejemplo Origen Huila 500 g. También hay accesorios, como la prensa francesa y el molino manual.
 
-Cantidad(number)  Número de unidades vendidas en esa venta. La venta 8 tiene 0, que es un valor sospechoso. 
+ciudad: texto. Es la ciudad donde se hizo la venta. No todas están escritas igual, más abajo lo explico.
 
-precio(number) Precio por unidad del producto, en pesos colombianos.
+cantidad: número. Son las unidades que se vendieron en esa línea.
 
-CASOS BORDES DETECTADOS
+precio: número. Es lo que cuesta una unidad, en pesos colombianos. La tabla no lo aclara, pero lo asumo unitario porque el mismo producto mantiene su precio aunque cambie la cantidad. Por eso lo vendido en una línea es cantidad por precio.
 
-1:El primer caso Border detectado es el
+## Casos borde detectados
+
+Ciudad escrita distinto. En el id 5 la ciudad aparece como medellín, en minúscula, mientras que en los demás registros es Medellín. Para JavaScript son dos textos distintos, así que al agrupar por ciudad las ventas de Medellín quedarían partidas en dos. Decisión: voy a normalizar la ciudad al procesar los datos, quitando espacios sobrantes y dejando la primera letra en mayúscula, para que las dos formas cuenten como la misma ciudad. No voy a modificar datos.js, la corrección se hace en analitica.js.
+
+Cantidad en cero. El id 8 tiene cantidad 0, o sea que no hubo unidades vendidas. No es una venta real, pero si se deja entra en el conteo de transacciones y baja el promedio por venta. Decisión: voy a excluir los registros con cantidad 0 de todos los cálculos de ventas. El registro se queda en datos.js tal como vino.
+
+Clientes repetidos y cliente sin compra real. El cliente C01 aparece en tres registros (ids 1, 4 y 11), y C02 y C03 aparecen dos veces cada uno. Si cuento registros, el número de clientes sale inflado. Además, C06 solo aparece en el id 8, que tiene cantidad 0, así que en la práctica no compró nada. Decisión: voy a contar clientes únicos, no filas, y lo haré después de excluir los registros con cantidad 0, de modo que C06 no cuente como cliente que compró.
