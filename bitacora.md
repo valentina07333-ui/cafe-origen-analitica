@@ -25,3 +25,30 @@ Ciudad escrita distinto. En el id 5 la ciudad aparece como medellín, en minúsc
 Cantidad en cero. El id 8 tiene cantidad 0, o sea que no hubo unidades vendidas. No es una venta real, pero si se deja entra en el conteo de transacciones y baja el promedio por venta. Decisión: voy a excluir los registros con cantidad 0 de todos los cálculos de ventas. El registro se queda en datos.js tal como vino.
 
 Clientes repetidos y cliente sin compra real. El cliente C01 aparece en tres registros (ids 1, 4 y 11), y C02 y C03 aparecen dos veces cada uno. Si cuento registros, el número de clientes sale inflado. Además, C06 solo aparece en el id 8, que tiene cantidad 0, así que en la práctica no compró nada. Decisión: voy a contar clientes únicos, no filas, y lo haré después de excluir los registros con cantidad 0, de modo que C06 no cuente como cliente que compró.
+
+## Plan en pseudocódigo de los indicadores
+
+Total vendido
+Recorro: todas las ventas.
+Condición: cantidad mayor que 0.
+Acumulo: cantidad por precio de cada venta.
+Inicio: totalVendido en 0.
+
+Unidades vendidas
+Recorro: todas las ventas.
+Condición: cantidad mayor que 0.
+Acumulo: la cantidad de cada venta.
+Inicio: totalUnidades en 0.
+
+Venta más grande
+Recorro: todas las ventas.
+Condición: cantidad mayor que 0 y cantidad por precio mayor que el máximo que llevo.
+Guardo: el valor más alto encontrado y el id de esa venta.
+Inicio: mayorValor en 0 y mayorId sin valor.
+
+Ticket promedio
+Recorro: todas las ventas.
+Condición: cantidad mayor que 0.
+Cuento y acumulo: cuento las ventas válidas y sumo cantidad por precio de cada una.
+Inicio: cantidadVentas en 0 y sumaValores en 0.
+Al terminar: si cantidadVentas es mayor que 0, divido sumaValores entre cantidadVentas; si es 0, el ticket promedio es 0 para no dividir por cero.
