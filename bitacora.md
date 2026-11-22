@@ -299,3 +299,27 @@ Además de comparar las ventas por pares, cuando encuentra dos ventas del mismo 
 ## Conclusión para la gerente
 
 El reporte se demora más cuando hay muchas ventas porque revisa muchas combinaciones de clientes y vuelve a buscar si ya encontró a cada uno. Por eso, al aumentar las ventas, el tiempo puede crecer mucho más rápido que la cantidad de datos. Para que el reporte siga respondiendo rápido, conviene evitar repetir esas búsquedas.
+
+## Recorridos y arreglos de las dos versiones
+
+`totalCiudadCadena` recorre los datos cuatro veces: una en cada `map`, otra en `filter` y otra en `reduce`. Crea tres arreglos nuevos: el de ventas normalizadas, el de ventas filtradas y el de valores. Su tiempo es O(n) y el espacio adicional es O(n), porque esos arreglos pueden crecer junto con la cantidad de ventas.
+
+`totalCiudadUnaPasada` recorre las ventas una vez con un ciclo y no crea arreglos nuevos. Su tiempo también es O(n), pero usa O(1) de espacio adicional porque solo guarda el total y la ciudad normalizada que está revisando.
+
+Las dos funciones son O(n) en tiempo porque el trabajo crece en proporción a la cantidad de ventas. `totalCiudadCadena` hace cuatro recorridos, así que tarda más en la práctica, pero esos cuatro recorridos son un número fijo: al simplificar Big O se elimina esa constante y queda O(n). La otra hace un recorrido, que también crece en proporción a n, así que igualmente es O(n).
+
+## Complejidad espacial de las funciones
+
+En esta clasificación no cuento el arreglo de ventas que recibe cada función, solo la memoria adicional que usa. Son O(1) las que guardan una cantidad fija de datos, sin importar cuántas ventas reciban:
+
+`valorVenta`, `totalVendido`, `unidadesVendidas`, `ventaMayor`, `ticketPromedio`, `ventasPorCiudad`, `totalCiudadUnaPasada`, `totalVendidoConteo`, `ventaMayorConteo` y `primeraVentaConteo`.
+
+Usan O(n) de espacio adicional las que crean arreglos o guardan resultados que pueden crecer con las ventas:
+
+`totalVendidoM`, `unidadesVendidasM` y `ventasPorCiudadM` crean un arreglo con `filter`. La versión en cadena que comparé, `totalCiudadCadena`, crea arreglos intermedios con sus `map` y `filter`; decidí no dejarla en el motor. `ventasDelDia` guarda las ventas que coinciden en otro arreglo. `clientesRecurrentes` guarda los clientes repetidos.
+
+`totalPorCiudad` y `totalPorCiudadConteo` guardan un total por ciudad en un objeto. Si hay c ciudades distintas, usan O(c) espacio; en el peor caso c puede crecer hasta n, así que se clasifican como O(n). `unidadesPorProducto` hace lo mismo con los productos distintos. `topProductosPorValor` también guarda los totales por producto y crea arreglos para ordenar la lista; si hay p productos distintos, usa O(p), que en el peor caso es O(n). Aunque al final solo devuelva los primeros k, antes construye y ordena la lista completa.
+
+## Versión de totalCiudad que dejo en el motor
+
+Dejo `totalCiudadUnaPasada`. La versión en cadena se lee de forma declarativa, pero crea varios arreglos intermedios. La de una pasada también se entiende con facilidad, recorre las ventas una sola vez y usa memoria constante. Como ambas dan el mismo resultado y tienen tiempo O(n), prefiero la de una pasada para no gastar memoria extra cuando crezcan las ventas.
