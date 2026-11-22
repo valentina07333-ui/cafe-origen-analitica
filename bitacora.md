@@ -322,4 +322,4 @@ Usan O(n) de espacio adicional las que crean arreglos o guardan resultados que p
 
 ## Versión de totalCiudad que dejo en el motor
 
-Dejo `totalCiudadUnaPasada`. La versión en cadena se lee de forma declarativa, pero crea varios arreglos intermedios. La de una pasada también se entiende con facilidad, recorre las ventas una sola vez y usa memoria constante. Como ambas dan el mismo resultado y tienen tiempo O(n), prefiero la de una pasada para no gastar memoria extra cuando crezcan las ventas.
+Me quedo con `totalCiudadUnaPasada`. La versión con `map` y `filter` se lee bien, pero va creando arreglos temporales. La de un ciclo también se entiende y solo guarda el total mientras recorre las ventas. Como las dos dan el mismo resultado y tardan O(n), prefiero ahorrar esa memoria, sobre todo si la lista de ventas crece.
