@@ -4,6 +4,7 @@ const {
   ventaMayorConteo,
   totalPorCiudadConteo,
   primeraVentaConteo,
+  clientesRecurrentes,
 } = require("./analitica");
 
 const tamanos = [100, 1000, 10000, 100000];
@@ -47,3 +48,13 @@ for (let i = 1; i < tabla.length; i++) {
 }
 
 console.table(crecimiento);
+
+const tamanosTiempo = [1000, 2000, 4000, 8000, 16000, 100000];
+
+for (const n of tamanosTiempo) {
+  const ventas = generarVentas(n);
+  const etiqueta = `clientesRecurrentes n=${n}`;
+  console.time(etiqueta);
+  clientesRecurrentes(ventas);
+  console.timeEnd(etiqueta);
+}

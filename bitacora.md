@@ -252,3 +252,50 @@ totalPorCiudadConteo: O(n). Un solo ciclo, hasta 3 operaciones por venta (3n).
 primeraVentaConteo: O(1). No tiene ciclo y siempre hace 2 operaciones, sin importar n.
 
 Ninguna es O(n²): no hay ciclos dentro de ciclos, y si los hubiera, al multiplicar n por 10 las operaciones se multiplicarían por 100, no por 10.
+
+## Traza de clientesRecurrentes
+
+Para revisar los clientes repetidos usé cinco ventas: los ids 1, 2, 3, 4 y 5. En ese orden, sus clientes son C01, C02, C03, C01 y C04. La función compara cada venta con las que vienen después; no repite pares.
+
+| Venta de afuera | Se compara con | ¿Mismo cliente? |
+|---|---|---|
+| id 1 (C01) | id 2 (C02) | No |
+| id 1 (C01) | id 3 (C03) | No |
+| id 1 (C01) | id 4 (C01) | Sí, se agrega C01 |
+| id 1 (C01) | id 5 (C04) | No |
+| id 2 (C02) | id 3 (C03) | No |
+| id 2 (C02) | id 4 (C01) | No |
+| id 2 (C02) | id 5 (C04) | No |
+| id 3 (C03) | id 4 (C01) | No |
+| id 3 (C03) | id 5 (C04) | No |
+| id 4 (C01) | id 5 (C04) | No |
+
+En total hizo 10 comparaciones entre clientes y devolvió C01. Para n ventas, la primera se compara con n−1 ventas, la segunda con n−2, y así hasta la última pareja. Entonces hace (n−1) + (n−2) + ... + 1 = n(n−1)/2 comparaciones. Con cinco ventas da 5×4/2 = 10; al crecer n, el número de comparaciones crece aproximadamente como n².
+
+## Tiempo de ejecución de clientesRecurrentes
+
+Medí la función con `console.time` y `console.timeEnd`, usando ventas generadas para cada tamaño. El tiempo empieza después de generar el arreglo, así que mide solo la función. Estos fueron los resultados de mi ejecución:
+
+| Ventas (n) | Tiempo aproximado |
+|---:|---:|
+| 1.000 | 0,0 s |
+| 2.000 | 0,0 s |
+| 4.000 | 0,0 s |
+| 8.000 | 0,1 s |
+| 16.000 | 0,6 s |
+
+Los tiempos pueden cambiar un poco en otra ejecución. Aun así, se ve que al duplicar las ventas el tiempo crece bastante más del doble, parecido a lo que esperaba por las comparaciones entre pares.
+
+Cuando duplico las ventas, el tiempo aumenta más que el doble. Por ejemplo, con 8.000 tarda cerca de 0,1 s y con 16.000, cerca de 0,6 s. Esto se relaciona con O(n²), porque al duplicar n hay aproximadamente cuatro veces más pares de ventas que comparar. Los tiempos están redondeados, así que la proporción es aproximada.
+
+## Estimación para arreglos más grandes
+
+Con el resultado de 16.000 ventas (cerca de 0,6 s), calculé que 100.000 tardaría unos 23 s si el tiempo crece como n². Como esa estimación es menor a dos minutos, ejecuté la función: tardó cerca de 29 s. Para 1.000.000, usando ese último resultado, calculo alrededor de 48 minutos. Es una estimación; puede variar según los datos generados y el computador.
+
+## Costo de `recurrentes.includes`
+
+Además de comparar las ventas por pares, cuando encuentra dos ventas del mismo cliente la función busca ese cliente con `recurrentes.includes`. Esa búsqueda también recorre un arreglo. En el peor caso puede revisar hasta n clientes y ejecutarse para muchos pares repetidos; por eso el costo total puede llegar a O(n³). La función no queda garantizada como O(n²): esa sería la complejidad si no tuviera esa búsqueda adicional. En las mediciones, el tiempo también depende de cuántos clientes se repiten.
+
+## Conclusión para la gerente
+
+El reporte se demora más cuando hay muchas ventas porque revisa muchas combinaciones de clientes y vuelve a buscar si ya encontró a cada uno. Por eso, al aumentar las ventas, el tiempo puede crecer mucho más rápido que la cantidad de datos. Para que el reporte siga respondiendo rápido, conviene evitar repetir esas búsquedas.
