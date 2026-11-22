@@ -119,7 +119,16 @@ function topProductosPorValor(ventas, k) {
   const lista = Object.entries(valores).map(([producto, valor]) => ({ producto, valor }));
   return [...lista].sort((a, b) => b.valor - a.valor).slice(0, k);
 }
-
+function ventasDelDia(ventas, fecha) {
+  const dia = fecha.trim();
+  const delDia = [];
+  for (const venta of ventas) {
+    if (venta.cantidad > 0 && venta.fecha === dia) {
+      delDia.push(venta);
+    }
+  }
+  return delDia;
+}
 module.exports = {
   valorVenta,
   totalVendido,
@@ -133,4 +142,5 @@ module.exports = {
   totalPorCiudad,
   unidadesPorProducto,
   topProductosPorValor,
+  ventasDelDia,
 };

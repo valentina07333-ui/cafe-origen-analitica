@@ -185,3 +185,35 @@ unidadesPorProducto
 
 topProductosPorValor
 ¿Qué recorro? Primero todas las ventas, y después la lista de productos ya agrupados.
+
+## Errores reportados por la gerente
+
+Una versión preliminar que le compartió un compañero mostraba dos errores. Los reproduje con una entrada concreta desde la terminal y comprobé que mi versión ya no los presenta.
+
+Error 1: Bogotá aparecía dos veces
+
+Síntoma: en el total por ciudad, Bogotá salía como dos grupos distintos, con el total partido en dos.
+
+Entrada que lo produce: ventas cuya ciudad está escrita Bogotá, Bogotá con un espacio al final y bogotá en minúscula.
+
+Hipótesis: el agrupador usa el texto de la ciudad tal como viene, así que JavaScript trata cada variante como una clave distinta.
+
+Prueba realizada: pasé a totalPorCiudad tres ventas de 1000 con cantidades 1, 2 y 3, escritas con las tres variantes. El resultado tiene una sola clave, Bogotá, con 6000.
+
+Causa: la ciudad no se normalizaba antes de usarla como clave. Es el mismo caso del id 5, que viene como medellín.
+
+Corrección: totalPorCiudad quita los espacios con trim, pasa todo a minúscula y deja la primera letra en mayúscula antes de agrupar. En mi versión el error ya no existe.
+
+Error 2: el ticket promedio daba NaN en un día sin ventas
+
+Síntoma: al filtrar un día sin ventas, el ticket promedio salía NaN.
+
+Entrada que lo produce: el día 2026-09-07, que no tiene ventas porque la muestra va del 1 al 6 de septiembre.
+
+Hipótesis: al no haber ventas, la función divide 0 entre 0, y eso da NaN en JavaScript.
+
+Prueba realizada: filtré el día 2026-09-07 con ventasDelDia, que devolvió un arreglo vacío, y pasé ese arreglo a ticketPromedio. Devolvió 0.
+
+Causa: la división no estaba protegida cuando la cantidad de ventas válidas es 0.
+
+Corrección: ticketPromedio revisa si la cantidad de ventas válidas es 0 y, en ese caso, devuelve 0 sin dividir. En mi versión el error ya no existe.
