@@ -12,11 +12,11 @@ cliente: texto. Es el código del cliente, por ejemplo C01. Es un código y no u
 
 producto: texto. Es el nombre de lo que se vendió. En el café la presentación va dentro del nombre, por ejemplo Origen Huila 500 g. También hay accesorios, como la prensa francesa y el molino manual.
 
-ciudad: texto. Es la ciudad donde se hizo la venta. No todas están escritas igual, más abajo lo explico.
+ciudad: texto. Es la ciudad donde se hizo la venta, por ejemplo Medellín.
 
 cantidad: número. Son las unidades que se vendieron en esa línea.
 
-precio: número. Es lo que cuesta una unidad, en pesos colombianos. La tabla no lo aclara, pero lo asumo unitario porque el mismo producto mantiene su precio aunque cambie la cantidad. Por eso lo vendido en una línea es cantidad por precio.
+precio: número. Es lo que cuesta una unidad, en pesos colombianos.
 
 ## Casos borde detectados
 
