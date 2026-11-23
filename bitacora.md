@@ -389,3 +389,11 @@ Comparé las tres salidas después de ordenarlas. Con los datos del Día 1 (12 v
 En la medición actual con 100.000 ventas generadas, `comprasPorCliente` tardó cerca de 0,004 segundos, `clientesRecurrentes` unos 0,010 y `clientesRecurrentesSet` unos 0,007. Las dos versiones de recurrentes quedaron bajo el segundo que pide el marketplace.
 
 La mejora usa memoria para recordar clientes: O(u), donde u es la cantidad de clientes distintos; en el peor caso, O(n). A cambio, el `Map` y los `Set` encuentran clientes en O(1) en promedio, y las versiones nuevas tardan O(n) en promedio. La versión original hacía n(n−1)/2 comparaciones de pares (O(n²)); además, `includes` podía llevar su peor caso a O(n³).
+
+## Campaña de fin de año: combos para la tarjeta regalo
+
+### Fuerza bruta
+
+La primera versión de `comboRegalo(catalogo, valor)` revisa los productos de dos en dos. El segundo ciclo empieza justo después del primero, así no compara un producto consigo mismo ni vuelve a revisar el mismo par al revés. Si los dos precios suman el valor de la tarjeta, guarda los nombres de ambos productos.
+
+Con n productos, revisa n(n−1)/2 pares; por eso el tiempo es O(n²). Aparte de la lista de resultados, solo necesita O(1) de espacio. Si encuentra m combos, guardar esos resultados ocupa O(m); en el peor caso podrían ser O(n²).

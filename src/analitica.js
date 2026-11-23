@@ -262,6 +262,20 @@ function clientesRecurrentesSet(ventas) {
   return [...vistos].filter((cliente) => recurrentes.has(cliente));
 }
 
+function comboRegalo(catalogo, valor) {
+  const combos = [];
+
+  for (let i = 0; i < catalogo.length; i++) {
+    for (let j = i + 1; j < catalogo.length; j++) {
+      if (catalogo[i].precio + catalogo[j].precio === valor) {
+        combos.push([catalogo[i].producto, catalogo[j].producto]);
+      }
+    }
+  }
+
+  return combos;
+}
+
 module.exports = {
   valorVenta,
   totalVendido,
@@ -285,6 +299,7 @@ module.exports = {
   comprasPorCliente,
   clientesRecurrentes,
   clientesRecurrentesSet,
+  comboRegalo,
 
 
 };
