@@ -146,6 +146,7 @@ function productoEstrellaPorCiudad(ventas) {
     let maximo = 0;
 
     for (const [producto, frecuencia] of conteosProductos) {
+      // En empate conserva el primero visto en esa ciudad.
       if (frecuencia > maximo) {
         productoEstrella = producto;
         maximo = frecuencia;
@@ -321,9 +322,9 @@ function clientesRecurrentesSet(ventas) {
   return [...vistos].filter((cliente) => recurrentes.has(cliente));
 }
 
-// Fuerza bruta: prueba cada par distinto de productos una sola vez.
-// Tiempo O(n²); espacio O(1) auxiliar, más O(m) para los m combos devueltos.
-function comboRegalo(catalogo, valor) {
+// Referencia por fuerza bruta: prueba cada par distinto.
+// Tiempo O(n²); espacio O(1) auxiliar, más O(m) por los m resultados.
+function comboRegaloFuerzaBruta(catalogo, valor) {
   const combos = [];
 
   for (let i = 0; i < catalogo.length; i++) {
@@ -337,9 +338,9 @@ function comboRegalo(catalogo, valor) {
   return combos;
 }
 
-// Busca el primer complemento visto en una sola pasada.
+// Busca un complemento en una sola pasada.
 // Tiempo O(n) promedio y espacio O(n) para los precios guardados.
-function comboRegaloOptimizado(catalogo, valor) {
+function comboRegalo(catalogo, valor) {
   const productosPorPrecio = new Map();
 
   for (const item of catalogo) {
@@ -353,6 +354,87 @@ function comboRegaloOptimizado(catalogo, valor) {
   }
 
   return null;
+}
+
+// Alias explícito para comparar con la versión de fuerza bruta.
+function comboRegaloOptimizado(catalogo, valor) {
+  return comboRegalo(catalogo, valor);
+}
+
+// Fuerza bruta: suma desde cero cada bloque consecutivo de k días.
+// Tiempo O((n-k+1)k), es decir O(nk); espacio auxiliar O(1).
+function mejorSemanaBruta(dias, k) {
+  if (!Number.isInteger(k) || k <= 0 || k > dias.length) {
+    return null;
+  }
+
+  let mejorTotal = -Infinity;
+  for (let inicio = 0; inicio <= dias.length - k; inicio++) {
+    let total = 0;
+    for (let desplazamiento = 0; desplazamiento < k; desplazamiento++) {
+      total += dias[inicio + desplazamiento];
+    }
+    if (total > mejorTotal) {
+      mejorTotal = total;
+    }
+  }
+
+  return mejorTotal;
+}
+
+// Ventana deslizante: reutiliza la suma anterior al moverla un día.
+// Tiempo O(n) y espacio auxiliar O(1).
+function mejorSemana(dias, k) {
+  if (!Number.isInteger(k) || k <= 0 || k > dias.length) {
+    return null;
+  }
+
+  let totalVentana = 0;
+  for (let i = 0; i < k; i++) {
+    totalVentana += dias[i];
+  }
+
+  let mejorTotal = totalVentana;
+  let mejorInicio = 0;
+
+  for (let entra = k; entra < dias.length; entra++) {
+    totalVentana += dias[entra] - dias[entra - k];
+    if (totalVentana > mejorTotal) {
+      mejorTotal = totalVentana;
+      mejorInicio = entra - k + 1;
+    }
+  }
+
+  return { total: mejorTotal, diaInicio: mejorInicio + 1 };
+}
+
+// Ordena copia O(n log n); dos punteros O(n); espacio O(n) por la copia.
+function parMasCercano(precios, presupuesto) {
+  if (!Array.isArray(precios) || precios.length < 2) {
+    return null;
+  }
+
+  const ordenados = [...precios].sort((a, b) => a.precio - b.precio);
+  let izquierda = 0;
+  let derecha = ordenados.length - 1;
+  let mejorSuma = -Infinity;
+  let mejorPar = null;
+
+  while (izquierda < derecha) {
+    const suma = ordenados[izquierda].precio + ordenados[derecha].precio;
+
+    if (suma <= presupuesto) {
+      if (suma > mejorSuma) {
+        mejorSuma = suma;
+        mejorPar = [ordenados[izquierda].producto, ordenados[derecha].producto];
+      }
+      izquierda++;
+    } else {
+      derecha--;
+    }
+  }
+
+  return mejorPar;
 }
 
 module.exports = {
@@ -381,7 +463,11 @@ module.exports = {
   clientesRecurrentes,
   clientesRecurrentesSet,
   comboRegalo,
+  comboRegaloFuerzaBruta,
   comboRegaloOptimizado,
+  mejorSemanaBruta,
+  mejorSemana,
+  parMasCercano,
 
 
 };
