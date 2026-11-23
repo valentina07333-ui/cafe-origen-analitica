@@ -222,7 +222,7 @@ function comprasPorCliente(ventas) {
     if (venta.cantidad <= 0) continue;
 
     const cliente = venta.cliente;
-    const cantidad = conteos.get(cliente) || 0;
+    const cantidad = conteos.has(cliente) ? conteos.get(cliente) : 0;
     conteos.set(cliente, cantidad + 1);
   }
 
@@ -253,6 +253,10 @@ function clientesRecurrentesSet(ventas) {
     } else {
       vistos.add(cliente);
     }
+  }
+
+  if (recurrentes.size === 0) {
+    return [];
   }
 
   return [...vistos].filter((cliente) => recurrentes.has(cliente));

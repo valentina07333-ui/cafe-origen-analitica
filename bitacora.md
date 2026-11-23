@@ -357,7 +357,7 @@ Lo aclaré en el informe.
 
 La entrada es un arreglo de ventas con un código de cliente y una cantidad. La salida es una lista con los clientes que hicieron más de una compra, sin repetirlos. Solo cuento ventas con cantidad mayor que cero; cada fila válida cuenta como una compra, aunque tenga varias unidades. No modifico el arreglo y conservo el orden en que apareció cada cliente. La meta es tardar menos de un segundo con 100.000 ventas.
 
-### Casos borde
+### Ejemplos y casos borde
 
 | Clientes en las ventas | Resultado esperado |
 |---|---|
@@ -376,7 +376,7 @@ La versión original comparaba cada venta con todas las que venían después. Pa
 
 ### Idea de optimización
 
-En vez de comparar cada venta con las demás, puedo guardar quién ya apareció. Para contar las compras usaré un `Map`; también quiero comparar esa idea con dos `Set`, uno para los vistos y otro para los repetidos.
+En vez de comparar cada venta con las demás, guardo quién ya apareció. La versión `Map` usa `has`, `get` y `set` para actualizar el conteo de cada cliente. La versión con dos `Set` usa `has` y `add`; consulta `size` para devolver enseguida una lista vacía si no encontró clientes repetidos.
 
 ### Implementación
 
@@ -386,6 +386,6 @@ En vez de comparar cada venta con las demás, puedo guardar quién ya apareció.
 
 Comparé las tres salidas después de ordenarlas. Con los datos del Día 1 (12 ventas), todas devolvieron 3 clientes. Con 5.000 ventas generadas, todas devolvieron 1.324. También revisé los casos borde de arriba.
 
-Con 100.000 ventas generadas, `comprasPorCliente` tardó unos 0,003 segundos, `clientesRecurrentes` unos 0,011 y `clientesRecurrentesSet` unos 0,006. Las dos versiones de recurrentes quedaron bajo el segundo que pide el marketplace.
+En la medición actual con 100.000 ventas generadas, `comprasPorCliente` tardó cerca de 0,004 segundos, `clientesRecurrentes` unos 0,010 y `clientesRecurrentesSet` unos 0,007. Las dos versiones de recurrentes quedaron bajo el segundo que pide el marketplace.
 
 La mejora usa memoria para recordar clientes: O(u), donde u es la cantidad de clientes distintos; en el peor caso, O(n). A cambio, el `Map` y los `Set` encuentran clientes en O(1) en promedio, y las versiones nuevas tardan O(n) en promedio. La versión original hacía n(n−1)/2 comparaciones de pares (O(n²)); además, `includes` podía llevar su peor caso a O(n³).

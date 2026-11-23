@@ -62,13 +62,13 @@ No tiene mucho sentido dar tantos decimales para una estimación. La mayoría de
 | `clientesRecurrentes` | Alrededor de una décima de segundo, según la medición de 100.000 ventas |
 | `clientesRecurrentesSet` | Menos de una décima de segundo, según la medición de 100.000 ventas |
 
-Para las funciones O(n), tomé el tiempo de 10.000 ventas y lo multipliqué por 100. Para los conteos de clientes también revisé la prueba de 100.000: un millón de ventas daría cerca de 0,03 segundos en `comprasPorCliente`, 0,1 en `clientesRecurrentes` y menos de una décima en la versión con `Set`. Son estimaciones de una corrida, no garantías.
+Para las funciones O(n), tomé el tiempo de 10.000 ventas y lo multipliqué por 100. Para los conteos de clientes también revisé la prueba de 100.000: un millón de ventas daría cerca de 0,04 segundos en `comprasPorCliente`, 0,10 en `clientesRecurrentes` y 0,07 en la versión con `Set`. Son estimaciones de una corrida, no garantías.
 
 ## Riesgos
 
 El mayor riesgo que encontré fue la versión original de `clientesRecurrentes`. Comparaba las ventas por pares y, cuando encontraba una coincidencia, `includes` volvía a buscar en la lista de clientes repetidos. Las comparaciones por pares crecen como O(n²), y esa búsqueda puede elevar el peor caso a O(n³). Esa versión podía volverse muy lenta al crecer las ventas.
 
-Ese riesgo ya se redujo con `comprasPorCliente` y `clientesRecurrentes`, que guardan los conteos en un `Map`, y con `clientesRecurrentesSet`, que usa dos `Set`. Ambas alternativas nuevas recorren las ventas en O(n) promedio y usan O(u) de memoria, donde u es la cantidad de clientes distintos. En la medición con 100.000 ventas tardaron cerca de 0,011 segundos (`Map`) y 0,006 segundos (`Set`).
+Ese riesgo ya se redujo con `comprasPorCliente` y `clientesRecurrentes`, que guardan los conteos en un `Map`, y con `clientesRecurrentesSet`, que usa dos `Set`. Ambas alternativas nuevas recorren las ventas en O(n) promedio y usan O(u) de memoria, donde u es la cantidad de clientes distintos. En la medición con 100.000 ventas tardaron cerca de 0,010 segundos (`Map`) y 0,007 segundos (`Set`).
 
 Después revisaría `topProductosPorValor` si creciera mucho el catálogo: suma cada venta y ordena los p productos, con costo O(n + p log p). También vigilaría las funciones que guardan listas o agrupaciones (`totalVendidoM`, `unidadesVendidasM`, `ventasPorCiudadM`, `totalCiudadCadena`, `ventasDelDia`, `totalPorCiudad`, `totalPorCiudadConteo`, `unidadesPorProducto` y las versiones de clientes), porque su memoria adicional puede aumentar con los datos.
 
@@ -80,7 +80,7 @@ En la versión original se repetía el trabajo de comparar cada venta con las qu
 
 Antes la función comparaba cada venta con las demás. Ahora `comprasPorCliente` lleva la cuenta en un `Map`, y `clientesRecurrentes` usa esos conteos para devolver los clientes repetidos. Dejé también `clientesRecurrentesSet` para hacer lo mismo con dos `Set`. Las dos versiones entregan los clientes en el mismo orden.
 
-En la prueba con 100.000 ventas, contar las compras tardó unos 0,003 segundos. Obtener los recurrentes tardó unos 0,011 con `Map` y 0,006 con `Set`. Las dos opciones quedaron muy por debajo del segundo; en los casos que probé dieron la misma lista.
+En la prueba actual con 100.000 ventas, contar las compras tardó unos 0,004 segundos. Obtener los recurrentes tardó unos 0,010 con `Map` y 0,007 con `Set`. Las dos opciones quedaron muy por debajo del segundo; en los casos que probé dieron la misma lista.
 
 ### Comparación de tiempos
 
@@ -90,7 +90,7 @@ Con 1.000 ventas las tres responden rápido. Con 10.000, la versión original ya
 |---:|---:|---:|---:|
 | 1.000 | 3,6 ms | 0,3 ms | 0,2 ms |
 | 10.000 | 213 ms | 1,3 ms | 0,7 ms |
-| 100.000 | cerca de 29 s (medición anterior) | 11 ms | 6 ms |
+| 100.000 | cerca de 40 s (medición anterior) | 10 ms | 7 ms |
 
 Los tiempos cambian un poco en cada corrida porque los datos se generan al azar. Pero la diferencia se nota: con 100.000 ventas, `Map` y `Set` terminaron en unos milisegundos, muy por debajo del segundo que pide el marketplace.
 
