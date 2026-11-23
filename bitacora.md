@@ -53,6 +53,23 @@ Cuento y acumulo: cuento las ventas válidas y sumo cantidad por precio de cada 
 Inicio: cantidadVentas en 0 y sumaValores en 0.
 Al terminar: si cantidadVentas es mayor que 0, divido sumaValores entre cantidadVentas; si es 0, el ticket promedio es 0 para no dividir por cero.
 
+Ventas por ciudad
+Normalizo: quito los espacios al principio y al final de la ciudad buscada y la paso a minúsculas.
+Recorro: todas las ventas.
+Condición: cantidad mayor que 0 y ciudad normalizada igual a la ciudad buscada.
+Acumulo: cantidad por precio de cada venta que cumple la condición.
+Inicio: total en 0.
+
+Total por ciudad
+Inicio: un objeto vacío para guardar los totales.
+Recorro: todas las ventas.
+Condición: cantidad mayor que 0.
+Normalizo: quito los espacios sobrantes y paso la ciudad a minúsculas; luego dejo la primera letra en mayúscula para usarla como nombre.
+Acumulo: cantidad por precio en la clave de esa ciudad. Si todavía no existe, la inicio en 0.
+Al terminar: devuelvo el objeto con el total de cada ciudad.
+
+En estas seis funciones del reto uso ciclos `for...of`; no uso `map`, `filter` ni `reduce`. Esos métodos aparecen en otras funciones del archivo, correspondientes a ejercicios posteriores.
+
 ## Pruebas y arreglo vacío
 
 Probé cada función con tres entradas: el arreglo completo, un arreglo con una sola venta (el id 1) y un arreglo vacío. valorVenta recibe un registro y no un arreglo, así que la probé con el id 1, que da 84000.
@@ -184,7 +201,11 @@ unidadesPorProducto
 ¿Cómo agrupo? Con un objeto cuyas claves son los nombres de producto.
 
 topProductosPorValor
-¿Qué recorro? Primero todas las ventas, y después la lista de productos ya agrupados.
+¿Qué recorro? Primero todas las ventas y luego la lista de productos agrupados.
+¿Qué filtro? Las ventas con cantidad mayor que 0.
+¿Qué transformo? Cada venta en su valor (cantidad por precio), y cada par producto-total en un objeto con `producto` y `valor`.
+¿Qué acumulo? El valor vendido por producto, empezando cada total en 0.
+¿Cómo agrupo? En un objeto cuyas claves son los productos. Después convierto sus entradas con `Object.entries`, ordeno una copia de la lista de mayor a menor y devuelvo los primeros `k` con `slice`.
 
 ## Errores reportados por la gerente
 
@@ -274,23 +295,23 @@ En total hizo 10 comparaciones entre clientes y devolvió C01. Para n ventas, la
 
 ## Tiempo de la versión original de clientesRecurrentes
 
-Medí la función con `console.time` y `console.timeEnd`, usando ventas generadas para cada tamaño. El tiempo empieza después de generar el arreglo, así que mide solo la función. Estos fueron los resultados de mi ejecución:
+Medí la versión original con `console.time` y `console.timeEnd`, usando el generador del MiniReto 5. Dejé la generación fuera del cronómetro y repetí la medición para reducir el efecto de la primera ejecución. Los tiempos cambian un poco entre arreglos aleatorios y entre ejecuciones; estos son valores aproximados:
 
-| Ventas (n) | Tiempo aproximado |
-|---:|---:|
-| 1.000 | 0,0 s |
-| 2.000 | 0,0 s |
-| 4.000 | 0,0 s |
-| 8.000 | 0,1 s |
-| 16.000 | 0,6 s |
+| Ventas (n) | Tiempo aproximado | Comparado con el tamaño anterior |
+|---:|---:|---:|
+| 1.000 | 0,002 s | — |
+| 2.000 | 0,009 s | cerca de 4 veces |
+| 4.000 | 0,032 s | cerca de 4 veces |
+| 8.000 | 0,139 s | cerca de 4 veces |
+| 16.000 | 0,70 s | cerca de 5 veces |
 
-Los tiempos pueden cambiar un poco en otra ejecución. Aun así, se ve que al duplicar las ventas el tiempo crece bastante más del doble, parecido a lo que esperaba por las comparaciones entre pares.
+En general, al duplicar las ventas el tiempo se acerca a cuatro veces, como cabe esperar de un crecimiento cuadrático. El último salto fue algo mayor; además de las comparaciones entre pares, `includes` vuelve a recorrer la lista de clientes repetidos, y el generador produce arreglos aleatorios. Por eso el tiempo medido no sigue una proporción exacta en cada salto.
 
-Cuando duplico las ventas, el tiempo aumenta más que el doble. Por ejemplo, con 8.000 tarda cerca de 0,1 s y con 16.000, cerca de 0,6 s. Esto se relaciona con O(n²), porque al duplicar n hay aproximadamente cuatro veces más pares de ventas que comparar. Los tiempos están redondeados, así que la proporción es aproximada.
+Al duplicar n, hay cuatro veces más pares de ventas que comparar. Eso explica el crecimiento cuadrático de las comparaciones. La búsqueda adicional de `includes` puede aumentar el tiempo y, en un arreglo ordenado de forma desfavorable, el peor caso de la función puede llegar a O(n³).
 
 ## Estimación de la versión original
 
-Con el resultado de 16.000 ventas (cerca de 0,6 s), calculé que 100.000 tardaría unos 23 s si el tiempo crece como n². Como esa estimación es menor a dos minutos, ejecuté la función: tardó cerca de 29 s. Para 1.000.000, usando ese último resultado, calculo alrededor de 48 minutos. Es una estimación; puede variar según los datos generados y el computador.
+Con 16.000 ventas, la función tardó cerca de 0,70 s. Proyectando ese dato con crecimiento cuadrático, 100.000 tomaría unos 27 s, por debajo de dos minutos; la ejecuté y tardó 40,3 s. A partir de esa medición, al multiplicar n por 10, estimo que 1.000.000 tardaría cerca de 67 minutos, también suponiendo crecimiento cuadrático. Es una proyección aproximada: `includes` puede hacer que el tiempo real se aparte de esa regla, sobre todo con otra distribución de clientes.
 
 ## Costo oculto de la versión original
 
@@ -302,11 +323,11 @@ La versión original se demoraba porque comparaba muchas combinaciones de client
 
 ## Recorridos y arreglos de las dos versiones
 
-`totalCiudadCadena` recorre los datos cuatro veces: una en cada `map`, otra en `filter` y otra en `reduce`. Crea tres arreglos nuevos: el de ventas normalizadas, el de ventas filtradas y el de valores. Su tiempo es O(n) y el espacio adicional es O(n), porque esos arreglos pueden crecer junto con la cantidad de ventas.
+`totalCiudadCadena` pasa por una cadena de métodos: primero normaliza todas las ventas con `map`, luego `filter` revisa todas para quedarse con las de la ciudad indicada, y el segundo `map` y `reduce` recorren solo las que pasaron el filtro. En total son cuatro pasos sobre sus arreglos, aunque los dos últimos pueden ser más cortos. Crea tres arreglos nuevos: las ventas normalizadas, las filtradas y sus valores. Su tiempo es O(n) y el espacio adicional es O(n).
 
 `totalCiudadUnaPasada` recorre las ventas una vez con un ciclo y no crea arreglos nuevos. Su tiempo también es O(n), pero usa O(1) de espacio adicional porque solo guarda el total y la ciudad normalizada que está revisando.
 
-Las dos funciones son O(n) en tiempo porque el trabajo crece en proporción a la cantidad de ventas. `totalCiudadCadena` hace cuatro recorridos, así que tarda más en la práctica, pero esos cuatro recorridos son un número fijo: al simplificar Big O se elimina esa constante y queda O(n). La otra hace un recorrido, que también crece en proporción a n, así que igualmente es O(n).
+Las dos funciones son O(n) en tiempo. Si se cuenta cada etapa como si pasara por las n ventas, la cadena hace O(4n), que se simplifica a O(n) porque se quita la constante 4. En la práctica sus dos últimas etapas ven solo las ventas filtradas. La versión de un ciclo visita cada venta una vez y también queda en O(n).
 
 ## Complejidad espacial de las funciones
 
@@ -316,13 +337,13 @@ En esta clasificación no cuento el arreglo de ventas que recibe cada función, 
 
 Usan O(n) de espacio adicional las que crean arreglos o guardan resultados que pueden crecer con las ventas:
 
-`totalVendidoM`, `unidadesVendidasM` y `ventasPorCiudadM` crean un arreglo con `filter`. La versión en cadena que comparé, `totalCiudadCadena`, crea arreglos intermedios con sus `map` y `filter`; decidí no dejarla en el motor. `ventasDelDia` guarda las ventas que coinciden en otro arreglo. `comprasPorCliente` y las dos versiones de `clientesRecurrentes` guardan datos por cliente distinto.
+`totalVendidoM`, `unidadesVendidasM` y `ventasPorCiudadM` crean un arreglo con `filter`. `totalCiudadCadena` crea tres arreglos intermedios con sus `map` y `filter`. `ventasDelDia` guarda las ventas que coinciden en otro arreglo. `comprasPorCliente` y las dos versiones de `clientesRecurrentes` guardan datos por cliente distinto.
 
 `totalPorCiudad` y `totalPorCiudadConteo` guardan un total por ciudad en un objeto. Si hay c ciudades distintas, usan O(c) espacio; en el peor caso c puede crecer hasta n, así que se clasifican como O(n). `unidadesPorProducto` hace lo mismo con los productos distintos. `topProductosPorValor` también guarda los totales por producto y crea arreglos para ordenar la lista; si hay p productos distintos, usa O(p), que en el peor caso es O(n). Aunque al final solo devuelva los primeros k, antes construye y ordena la lista completa.
 
 ## Versión de totalCiudad que dejo en el motor
 
-Me quedo con `totalCiudadUnaPasada`. La versión con `map` y `filter` se lee bien, pero va creando arreglos temporales. La de un ciclo también se entiende y solo guarda el total mientras recorre las ventas. Como las dos dan el mismo resultado y tardan O(n), prefiero ahorrar esa memoria, sobre todo si la lista de ventas crece.
+Para el reporte me quedo con `totalCiudadUnaPasada`: se entiende con facilidad y no crea arreglos temporales. Mantengo `totalCiudadCadena` para comparar los enfoques; también es legible y da el mismo resultado, pero reserva tres arreglos intermedios. Las dos son O(n) en tiempo, así que para una lista grande prefiero la que usa O(1) de espacio adicional.
 
 ## Revisión de un compañero
 
@@ -353,14 +374,18 @@ Los códigos se comparan tal como vienen; `C01` y `c01` cuentan como clientes di
 
 La versión original comparaba cada venta con todas las que venían después. Para n ventas hacía n(n−1)/2 comparaciones de pares. Además, al encontrar un cliente repetido, `includes` volvía a recorrer la lista de clientes repetidos. Las comparaciones de pares ya cuestan O(n²), y con esas búsquedas repetidas el peor caso llega a O(n³). La memoria adicional es O(n).
 
-### Idea y cambio
+### Idea de optimización
 
-En vez de comparar ventas entre sí, `comprasPorCliente` recorre las ventas y va sumando una compra al cliente correspondiente en un `Map`. Después, `clientesRecurrentes` devuelve los que tienen más de una. Las consultas al mapa son rápidas, así que el recorrido queda en O(n) en promedio. El espacio depende de cuántos clientes distintos haya.
+En vez de comparar cada venta con las demás, puedo guardar quién ya apareció. Para contar las compras usaré un `Map`; también quiero comparar esa idea con dos `Set`, uno para los vistos y otro para los repetidos.
 
-También probé otra forma, `clientesRecurrentesSet`, con dos `Set`: uno para los clientes que ya vi y otro para los que se repiten. Esta versión también ignora las filas con cantidad cero y devuelve los repetidos en el orden original.
+### Implementación
 
-### Tiempo y memoria
+`comprasPorCliente` recorre las ventas válidas y va sumando una compra al cliente en el `Map`. Después, `clientesRecurrentes` devuelve quienes tienen más de una. La versión `clientesRecurrentesSet` hace ese seguimiento con los dos conjuntos. Las tres conservan el orden de primera aparición y no modifican las ventas.
 
-Para no volver a buscar clientes, ahora guardo información de cada cliente distinto. Eso usa más memoria que guardar solo la lista final: el `Map` o los `Set` pueden crecer hasta el número de clientes distintos (O(u)). A cambio, encontrar o actualizar un cliente toma O(1) en promedio y el tiempo total baja a O(n). Si hay muchos clientes diferentes, esa memoria extra también crece.
+### Verificación y medición
 
-Probé los casos de arriba con las dos versiones de recurrentes y dieron las mismas listas. Con 100.000 ventas, `comprasPorCliente` tardó cerca de 0,003 segundos; `clientesRecurrentes`, 0,011; y `clientesRecurrentesSet`, 0,006. Las tres quedaron bajo el segundo que pide el marketplace.
+Comparé las tres salidas después de ordenarlas. Con los datos del Día 1 (12 ventas), todas devolvieron 3 clientes. Con 5.000 ventas generadas, todas devolvieron 1.324. También revisé los casos borde de arriba.
+
+Con 100.000 ventas generadas, `comprasPorCliente` tardó unos 0,003 segundos, `clientesRecurrentes` unos 0,011 y `clientesRecurrentesSet` unos 0,006. Las dos versiones de recurrentes quedaron bajo el segundo que pide el marketplace.
+
+La mejora usa memoria para recordar clientes: O(u), donde u es la cantidad de clientes distintos; en el peor caso, O(n). A cambio, el `Map` y los `Set` encuentran clientes en O(1) en promedio, y las versiones nuevas tardan O(n) en promedio. La versión original hacía n(n−1)/2 comparaciones de pares (O(n²)); además, `includes` podía llevar su peor caso a O(n³).

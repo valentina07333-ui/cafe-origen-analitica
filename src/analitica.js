@@ -92,6 +92,19 @@ function totalCiudadUnaPasada(ventas, ciudad) {
   return total;
 }
 
+function totalCiudadCadena(ventas, ciudad) {
+  const ciudadBuscada = ciudad.trim().toLowerCase();
+
+  return ventas
+    .map((venta) => ({
+      ...venta,
+      ciudad: venta.ciudad.trim().toLowerCase(),
+    }))
+    .filter((venta) => venta.cantidad > 0 && venta.ciudad === ciudadBuscada)
+    .map((venta) => valorVenta(venta))
+    .reduce((total, valor) => total + valor, 0);
+}
+
 function totalPorCiudad(ventas) {
   const totales = {};
   for (const venta of ventas) {
@@ -256,6 +269,7 @@ module.exports = {
   unidadesVendidasM,
   ventasPorCiudadM,
   totalCiudadUnaPasada,
+  totalCiudadCadena,
   totalPorCiudad,
   unidadesPorProducto,
   topProductosPorValor,

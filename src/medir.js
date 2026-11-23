@@ -69,7 +69,7 @@ const tamanosTiempo = [1000, 2000, 4000, 8000, 10000, 16000, 100000];
 for (const n of tamanosTiempo) {
   const ventas = generarVentas(n);
 
-  if (n <= 10000) {
+  if (n <= 16000) {
     const etiquetaOriginal = `clientesRecurrentesOriginal n=${n}`;
     console.time(etiquetaOriginal);
     clientesRecurrentesOriginal(ventas);

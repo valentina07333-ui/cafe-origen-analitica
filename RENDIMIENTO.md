@@ -2,7 +2,7 @@
 
 Revisé las funciones del motor con 10.000 ventas generadas. En la tabla anoté para qué sirve cada una, cuánto crece su trabajo y qué memoria necesita. No cuento el arreglo de ventas como memoria extra, porque la función ya lo recibe.
 
-Los tiempos son de una sola corrida con ventas generadas, así que pueden variar si se vuelve a ejecutar. `clientesRecurrentes` y `clientesRecurrentesSet` se midieron sobre el mismo arreglo. `totalCiudadCadena` es una alternativa que medí para comparar; no está en el motor. En las funciones `Conteo` anoté también las operaciones contadas por `medir.js`.
+Los tiempos son de una sola corrida con ventas generadas, así que pueden variar si se vuelve a ejecutar. `clientesRecurrentes` y `clientesRecurrentesSet` se midieron sobre el mismo arreglo. `totalCiudadCadena` está disponible para comparar los dos enfoques; el reporte usa `totalCiudadUnaPasada`. En las funciones `Conteo` anoté también las operaciones contadas por `medir.js`.
 
 | Función | Para qué sirve | Tiempo | Memoria extra | Cómo lo veo | Resultado con 10.000 ventas |
 |---|---|---|---|---|---:|
@@ -16,7 +16,7 @@ Los tiempos son de una sola corrida con ventas generadas, así que pueden variar
 | `unidadesVendidasM` | Suma unidades con `filter` y `reduce`. | O(n) | O(n) | También arma una lista temporal con `filter`. | 0,858 ms |
 | `ventasPorCiudadM` | Suma las ventas de una ciudad con `filter` y `reduce`. | O(n) | O(n) | Primero guarda las ventas que coinciden y después las suma. | 1,790 ms |
 | `totalCiudadUnaPasada` | Suma las ventas válidas de una ciudad. | O(n) | O(1) | Hace un ciclo y solo guarda el total. | 1,433 ms |
-| `totalCiudadCadena` (alternativa) | Hace lo mismo con `map`, `filter`, `map` y `reduce`. | O(n) | O(n) | Hace cuatro recorridos y va creando listas temporales. | 2,592 ms |
+| `totalCiudadCadena` | Hace lo mismo con `map`, `filter`, `map` y `reduce`. | O(n) | O(n) | Hace cuatro recorridos y crea tres arreglos intermedios. | 2,592 ms |
 | `totalPorCiudad` | Suma las ventas por ciudad. | O(n) | O(c), hasta O(n) | Guarda un total por ciudad; en el peor caso hay tantas ciudades como ventas. | 2,306 ms |
 | `unidadesPorProducto` | Suma las unidades de cada producto. | O(n) | O(p), hasta O(n) | Guarda un total por producto; puede haber tantos productos como ventas. | 1,178 ms |
 | `topProductosPorValor` | Ordena los productos por valor y devuelve los primeros k. | O(n + p log p), hasta O(n log n) | O(p), hasta O(n) | Primero suma por producto y luego ordena la lista de productos. | 1,113 ms |
@@ -31,7 +31,7 @@ Los tiempos son de una sola corrida con ventas generadas, así que pueden variar
 
 Los conteos no incluyen cada instrucción de JavaScript; son las visitas y comparaciones que decidí contar en `medir.js`. `u` representa los clientes distintos. Los tiempos son de una sola corrida y pueden variar, sobre todo en funciones que crean arreglos.
 
-De las dos versiones de `totalCiudad`, me quedé con `totalCiudadUnaPasada`: da el mismo resultado y no crea listas temporales. `clientesRecurrentes` ahora usa un `Map`, así que evita comparar cada venta con todas las demás.
+Para el reporte elegí `totalCiudadUnaPasada`: da el mismo resultado y no crea listas temporales. `totalCiudadCadena` se conserva para comparar legibilidad y memoria. `clientesRecurrentes` ahora usa un `Map`, así que evita comparar cada venta con todas las demás.
 
 ## Proyección
 
@@ -66,11 +66,15 @@ Para las funciones O(n), tomé el tiempo de 10.000 ventas y lo multipliqué por 
 
 ## Riesgos
 
-Si el catálogo creciera junto con las ventas, revisaría primero `topProductosPorValor`: además de recorrer las ventas, ordena los productos. Con el generador actual hay cinco productos, así que ese riesgo todavía es bajo.
+El mayor riesgo que encontré fue la versión original de `clientesRecurrentes`. Comparaba las ventas por pares y, cuando encontraba una coincidencia, `includes` volvía a buscar en la lista de clientes repetidos. Las comparaciones por pares crecen como O(n²), y esa búsqueda puede elevar el peor caso a O(n³). Esa versión podía volverse muy lenta al crecer las ventas.
 
-Después miraría las funciones que guardan listas o agrupaciones: `totalVendidoM`, `unidadesVendidasM`, `ventasPorCiudadM`, `ventasDelDia`, `totalPorCiudad`, `totalPorCiudadConteo`, `unidadesPorProducto` y `comprasPorCliente`. Su tiempo crece en línea con las ventas, pero la memoria que usan también puede crecer. Las dos versiones de clientes recurrentes usan memoria según los clientes distintos y tardan O(n) en promedio; con 100.000 ventas dieron unos 0,011 segundos (`Map`) y 0,006 segundos (`Set`) en esta corrida.
+Ese riesgo ya se redujo con `comprasPorCliente` y `clientesRecurrentes`, que guardan los conteos en un `Map`, y con `clientesRecurrentesSet`, que usa dos `Set`. Ambas alternativas nuevas recorren las ventas en O(n) promedio y usan O(u) de memoria, donde u es la cantidad de clientes distintos. En la medición con 100.000 ventas tardaron cerca de 0,011 segundos (`Map`) y 0,006 segundos (`Set`).
 
-Las demás hacen un recorrido y guardan pocos valores, o trabajan en tiempo constante. La alternativa `totalCiudadCadena` crea arreglos temporales; la probé, pero no la dejé en el motor.
+Después revisaría `topProductosPorValor` si creciera mucho el catálogo: suma cada venta y ordena los p productos, con costo O(n + p log p). También vigilaría las funciones que guardan listas o agrupaciones (`totalVendidoM`, `unidadesVendidasM`, `ventasPorCiudadM`, `totalCiudadCadena`, `ventasDelDia`, `totalPorCiudad`, `totalPorCiudadConteo`, `unidadesPorProducto` y las versiones de clientes), porque su memoria adicional puede aumentar con los datos.
+
+## Plan de optimización
+
+En la versión original se repetía el trabajo de comparar cada venta con las que venían después. Además, cada cliente repetido podía volver a buscarse con `includes` dentro de la lista de resultados. La mejora consiste en recordar cada cliente a medida que se recorre el arreglo: un `Map` guarda cuántas compras lleva, o dos `Set` separan los clientes vistos de los repetidos. Ya implementé ambas opciones y las comparé con la versión original; el costo pasa a O(n) en promedio, a cambio de guardar hasta O(u) datos.
 
 ## Clientes recurrentes después del cambio
 
@@ -90,4 +94,14 @@ Con 1.000 ventas las tres responden rápido. Con 10.000, la versión original ya
 
 Los tiempos cambian un poco en cada corrida porque los datos se generan al azar. Pero la diferencia se nota: con 100.000 ventas, `Map` y `Set` terminaron en unos milisegundos, muy por debajo del segundo que pide el marketplace.
 
-La mejora tiene un costo: ahora guardamos una referencia por cada cliente distinto. Eso ocupa memoria, pero evita volver a recorrer listas para encontrar clientes; en promedio, esa búsqueda es constante y el recorrido total crece en línea con las ventas.
+También se ve al contar el trabajo: la versión original compara cada venta con las que vienen después. Las otras dos revisan las ventas una vez y luego recorren la lista de clientes distintos.
+
+| Ventas | Pares revisados por la original | Trabajo de `Map` | Trabajo de `Set` |
+|---:|---:|---:|---:|
+| 1.000 | 499.500 | O(1.000 + u), lineal | O(1.000 + u), lineal |
+| 10.000 | 49.995.000 | O(10.000 + u), lineal | O(10.000 + u), lineal |
+| 100.000 | 4.999.950.000 | O(100.000 + u), lineal | O(100.000 + u), lineal |
+
+En las nuevas versiones, u es la cantidad de clientes distintos y no puede ser mayor que n. Por eso n + u crece en línea con las ventas: O(n). Las comparaciones por pares de la original crecen como O(n²); además, `includes` puede hacer que su peor caso llegue a O(n³).
+
+La mejora también usa memoria para guardar los clientes distintos. Es O(u), y como u puede llegar a n, en el peor caso es O(n). A cambio, `Map` y `Set` evitan volver a recorrer la lista para encontrar un cliente; esas búsquedas toman O(1) en promedio.
