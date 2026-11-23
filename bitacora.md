@@ -323,3 +323,9 @@ Usan O(n) de espacio adicional las que crean arreglos o guardan resultados que p
 ## Versión de totalCiudad que dejo en el motor
 
 Me quedo con `totalCiudadUnaPasada`. La versión con `map` y `filter` se lee bien, pero va creando arreglos temporales. La de un ciclo también se entiende y solo guarda el total mientras recorre las ventas. Como las dos dan el mismo resultado y tardan O(n), prefiero ahorrar esa memoria, sobre todo si la lista de ventas crece.
+
+## Revisión de un compañero
+
+Observación: La proyección puede cambiar según los datos.
+Respuesta: Sí, es aproximada y depende de las ventas generadas.
+Lo aclaré en el informe.
