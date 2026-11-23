@@ -1,30 +1,26 @@
 # Café Origen Analítica
 
-Un pequeño proyecto en JavaScript para entender las ventas de Café Origen, una tienda de café de origen y accesorios. Toma un registro de ventas (12 líneas, del 1 al 6 de septiembre de 2026) y saca los números que importan en un reporte por consola.
+Reporte de consola para analizar ventas de café y accesorios. Usa JavaScript y Node.js; no requiere dependencias.
 
-## Cómo correrlo
-
-Solo necesitas [Node.js](https://nodejs.org), no hay nada más que instalar.
+## Ejecutar
 
 ```bash
-node src/reporte.js     
-node src/pruebas.js      
-node src/verificar.js   
+node src/reporte.js          # 12 ventas de ejemplo
+node src/reporte.js 100000   # genera y analiza 100.000 ventas
 ```
 
-## Qué te cuenta
+El número debe ser un entero positivo. Los datos generados cambian en cada ejecución. El reporte también muestra la semana de septiembre calculada con los totales diarios del proyecto y las sugerencias basadas en el catálogo fijo.
 
-- Cuánto se vendió en total y cuántas unidades
-- Cuál fue la venta más grande
-- El ticket promedio
-- Cuánto se vendió por ciudad y por producto
-- Qué productos aportan más dinero
-- Cómo le fue a un día en particular
+## Qué muestra
 
-## Cosas a tener en cuenta
+Totales y promedios; ventas por ciudad y producto; productos estrella; clientes recurrentes y cliente para cupón; combo de $87.000; par bajo presupuesto de $100.000; mejor semana de siete días.
 
-- Las ventas con cantidad 0 no cuentan.
-- `medellín` y `Medellín` se tratan como la misma ciudad.
-- Si un día no tuvo ventas, el ticket promedio es 0, no `NaN`.
+Las ventas con cantidad 0 se excluyen y las variantes de escritura de una ciudad se normalizan.
 
-Las decisiones y los errores que se corrigieron por el camino están en `bitacora.md`.
+## Archivos
+
+- `src/reporte.js`: reporte y opción de generar n ventas.
+- `src/analitica.js`: funciones de análisis.
+- `src/datos.js`, `src/catalogo.js`, `src/generador.js`: ventas de ejemplo, catálogo y datos aleatorios.
+- `src/pruebas.js`, `src/verificar.js`, `src/medir.js`: pruebas, comparación y mediciones.
+- `bitacora.md`: decisiones y trazas; `RENDIMIENTO.md`: complejidad y tiempos.

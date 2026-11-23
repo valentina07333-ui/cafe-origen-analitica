@@ -28,6 +28,15 @@ Los tiempos son de una sola corrida con ventas generadas, así que pueden variar
 | `comprasPorCliente` | Cuenta las compras válidas de cada cliente. | O(n) promedio | O(u) | Actualiza un `Map` por cada venta con cantidad mayor que cero. | 0,557 ms |
 | `clientesRecurrentes` | Devuelve los clientes con más de una compra. | O(n) promedio | O(u) | Toma del `Map` los clientes que aparecen más de una vez. | 1,273 ms |
 | `clientesRecurrentesSet` | Hace lo mismo con dos `Set`. | O(n) promedio | O(u) | Uno recuerda quién apareció; el otro, quién se repitió. | 0,697 ms |
+| `productoEstrellaPorCiudad` | Devuelve el producto más vendido por ciudad. | O(n) promedio | O(n) | `Map` anidado cuenta por ciudad y producto; los empates conservan el primero. | No medido |
+| `primerClienteUnico` | Busca el primer cliente con una compra. | O(n) promedio | O(u) | Dos recorridos y un `Map` de compras por cliente. | No medido |
+| `comboRegalo` | Busca un par que sume el valor de la tarjeta. | O(n) promedio | O(n) | Una pasada; el `Map` busca el precio complemento. | No medido; catálogo |
+| `comboRegaloOptimizado` | Alias de `comboRegalo`. | O(n) promedio | O(n) | Llama a la búsqueda con `Map`. | No medido; catálogo |
+| `comboRegaloFuerzaBruta` | Devuelve todos los pares que suman el objetivo. | O(n²) | O(m) de resultados + O(1) auxiliar | Prueba cada par de productos una vez; m es el número de combos. | No medido; catálogo |
+| `mejorSemanaBruta` | Halla el máximo de ventanas de k días. | O((n−k+1)k), O(nk) | O(1) | Vuelve a sumar cada bloque desde cero; con k fijo es O(n). | No medido; 30 días |
+| `mejorSemana` | Halla máximo e inicio con ventana deslizante. | O(n) | O(1) | Suma una vez y resta el día que sale; agrega el que entra. | No medido; 30 días |
+| `parMasCercano` | Busca el par más cercano bajo el presupuesto. | O(n log n) | O(n) | Orden numérico O(n log n) y dos punteros O(n); ordenado de entrada, O(n). | No medido; catálogo |
+| `generarVentas` | Genera n ventas aleatorias. | O(n) | O(n) | Crea y devuelve un arreglo con n registros. | No medido |
 
 Los conteos no incluyen cada instrucción de JavaScript; son las visitas y comparaciones que decidí contar en `medir.js`. `u` representa los clientes distintos. Los tiempos son de una sola corrida y pueden variar, sobre todo en funciones que crean arreglos.
 
@@ -105,3 +114,14 @@ También se ve al contar el trabajo: la versión original compara cada venta con
 En las nuevas versiones, u es la cantidad de clientes distintos y no puede ser mayor que n. Por eso n + u crece en línea con las ventas: O(n). Las comparaciones por pares de la original crecen como O(n²); además, `includes` puede hacer que su peor caso llegue a O(n³).
 
 La mejora también usa memoria para guardar los clientes distintos. Es O(u), y como u puede llegar a n, en el peor caso es O(n). A cambio, `Map` y `Set` evitan volver a recorrer la lista para encontrar un cliente; esas búsquedas toman O(1) en promedio.
+
+## Tiempo total del reporte: v0.1 y v1.0
+
+Comparé el reporte de v0.1 (código del checkpoint `91ba195`) con el actual v1.0. Para que ambos procesaran el mismo tamaño, adapté solo la entrada de v0.1 para generar n ventas usando el mismo `generador.js`; una semilla fija produjo los mismos datos en ambas versiones. Medí el proceso completo: arranque de Node, generación, análisis e impresión (salida descartada). Hice 3 calentamientos y 7 corridas; la tabla muestra la mediana.
+
+| Ventas | v0.1 | v1.0 | Diferencia |
+|---:|---:|---:|---:|
+| 10.000 | 38,23 ms | 41,29 ms | v1.0 +3,06 ms (1,08×) |
+| 100.000 | 72,61 ms | 98,78 ms | v1.0 +26,17 ms (1,36×) |
+
+El tiempo total de v1.0 sube porque el reporte también calcula y muestra clientes recurrentes, productos estrella, combos, cupones, semana y presupuesto; v0.1 no incluía esas secciones. Aun así, ambas versiones terminaron en menos de 0,1 s en estas corridas. Esta comparación mide el reporte completo, no una sola función: las mejoras de complejidad de `clientesRecurrentes` y los demás algoritmos se detallan arriba. Los tiempos dependen del equipo y del proceso.
