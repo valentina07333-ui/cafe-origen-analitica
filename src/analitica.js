@@ -119,6 +119,65 @@ function totalPorCiudad(ventas) {
   }
   return totales;
 }
+
+function productoEstrellaPorCiudad(ventas) {
+  const conteosPorCiudad = new Map();
+
+  for (const venta of ventas) {
+    if (venta.cantidad <= 0) continue;
+
+    const ciudadTexto = venta.ciudad.trim().toLowerCase();
+    const ciudad = ciudadTexto.charAt(0).toUpperCase() + ciudadTexto.slice(1);
+
+    if (!conteosPorCiudad.has(ciudad)) {
+      conteosPorCiudad.set(ciudad, new Map());
+    }
+
+    const conteosProductos = conteosPorCiudad.get(ciudad);
+    conteosProductos.set(
+      venta.producto,
+      (conteosProductos.get(venta.producto) || 0) + 1,
+    );
+  }
+
+  const estrellas = {};
+  for (const [ciudad, conteosProductos] of conteosPorCiudad) {
+    let productoEstrella = null;
+    let maximo = 0;
+
+    for (const [producto, frecuencia] of conteosProductos) {
+      if (frecuencia > maximo) {
+        productoEstrella = producto;
+        maximo = frecuencia;
+      }
+    }
+
+    estrellas[ciudad] = productoEstrella;
+  }
+
+  return estrellas;
+}
+
+function primerClienteUnico(ventas) {
+  const comprasPorCliente = new Map();
+
+  for (const venta of ventas) {
+    if (venta.cantidad <= 0) continue;
+    comprasPorCliente.set(
+      venta.cliente,
+      (comprasPorCliente.get(venta.cliente) || 0) + 1,
+    );
+  }
+
+  for (const venta of ventas) {
+    if (venta.cantidad > 0 && comprasPorCliente.get(venta.cliente) === 1) {
+      return venta.cliente;
+    }
+  }
+
+  return null;
+}
+
 function unidadesPorProducto(ventas) {
   const unidades = {};
   for (const venta of ventas) {
@@ -262,6 +321,8 @@ function clientesRecurrentesSet(ventas) {
   return [...vistos].filter((cliente) => recurrentes.has(cliente));
 }
 
+// Fuerza bruta: prueba cada par distinto de productos una sola vez.
+// Tiempo O(n²); espacio O(1) auxiliar, más O(m) para los m combos devueltos.
 function comboRegalo(catalogo, valor) {
   const combos = [];
 
@@ -274,6 +335,24 @@ function comboRegalo(catalogo, valor) {
   }
 
   return combos;
+}
+
+// Busca el primer complemento visto en una sola pasada.
+// Tiempo O(n) promedio y espacio O(n) para los precios guardados.
+function comboRegaloOptimizado(catalogo, valor) {
+  const productosPorPrecio = new Map();
+
+  for (const item of catalogo) {
+    const complemento = valor - item.precio;
+
+    if (productosPorPrecio.has(complemento)) {
+      return [productosPorPrecio.get(complemento), item.producto];
+    }
+
+    productosPorPrecio.set(item.precio, item.producto);
+  }
+
+  return null;
 }
 
 module.exports = {
@@ -289,6 +368,8 @@ module.exports = {
   totalCiudadUnaPasada,
   totalCiudadCadena,
   totalPorCiudad,
+  productoEstrellaPorCiudad,
+  primerClienteUnico,
   unidadesPorProducto,
   topProductosPorValor,
   ventasDelDia,
@@ -300,6 +381,7 @@ module.exports = {
   clientesRecurrentes,
   clientesRecurrentesSet,
   comboRegalo,
+  comboRegaloOptimizado,
 
 
 };

@@ -1,288 +1,155 @@
 # Bitácora - Café Origen Analítica
 
-## Diccionario de datos
+## Datos y casos borde
 
-Cada registro de ventas es una línea de venta: un cliente compra una cantidad de un producto, en una ciudad y en un día concreto.
+Cada fila es una venta de un producto a un cliente, en una ciudad y fecha.
 
-id: número. Identifica cada registro. Va del 1 al 12 y no se repite.
+| Campo | Tipo y significado |
+|---|---|
+| `id` | Número único del registro: 1–12. |
+| `fecha` | Texto `AAAA-MM-DD`; se conserva así porque aún no se calculan fechas. |
+| `cliente` | Código de texto (p. ej., C01); puede repetirse y no es número. |
+| `producto` | Texto con presentación incluida (p. ej., Origen Huila 500 g); también hay prensa francesa y molino manual. |
+| `ciudad` | Texto del lugar de venta (p. ej., Medellín). |
+| `cantidad` | Número de unidades de esa línea. |
+| `precio` | Precio unitario en pesos colombianos. |
 
-fecha: texto. Es el día de la venta, escrito como 2026-09-01. Lo dejo como texto porque por ahora no necesito hacer cálculos con fechas.
+Casos y decisiones:
 
-cliente: texto. Es el código del cliente, por ejemplo C01. Es un código y no un número, y un mismo cliente puede aparecer varias veces.
+- **Ciudad con escritura distinta:** id 5 dice `medellín`; JavaScript lo separaría de `Medellín`. Normalizo al procesar en `analitica.js` (trim y mayúsculas/minúsculas coherentes); no cambio `datos.js`.
+- **Cantidad cero:** id 8 tiene cantidad 0; no es venta real y altera conteos y promedios. Excluyo cantidades 0 de todos los cálculos, pero dejo el registro en `datos.js`.
+- **Clientes repetidos:** C01 aparece en ids 1, 4 y 11; C02 y C03, dos veces cada uno. Cuento clientes únicos tras excluir cantidad 0; C06 solo figura en id 8 y no cuenta como comprador.
 
-producto: texto. Es el nombre de lo que se vendió. En el café la presentación va dentro del nombre, por ejemplo Origen Huila 500 g. También hay accesorios, como la prensa francesa y el molino manual.
+## Indicadores: lógica y resultados
 
-ciudad: texto. Es la ciudad donde se hizo la venta, por ejemplo Medellín.
+Las seis funciones iniciales usan `for...of`, no `map`, `filter` ni `reduce` (estos aparecen en ejercicios posteriores).
 
-cantidad: número. Son las unidades que se vendieron en esa línea.
+| Indicador | Recorrido y cálculo |
+|---|---|
+| `valorVenta` | Recibe una fila y devuelve cantidad × precio; no recorre ni agrupa. |
+| `totalVendido` | Suma `valorVenta` de filas con cantidad > 0; inicia en 0. |
+| `unidadesVendidas` | Suma cantidades > 0; inicia en 0. |
+| `ventaMayor` | Entre filas con cantidad > 0 conserva la de mayor cantidad × precio; inicia en `null`, sin ventas devuelve `null`. |
+| `ticketPromedio` | Suma valores y cuenta filas válidas; divide al final, o devuelve 0 si no hay ventas válidas. |
+| `ventasPorCiudad` | Suma valores válidos cuya ciudad normalizada (trim y minúsculas) coincide con la buscada; inicia en 0. |
+| `totalPorCiudad` | Suma valores válidos en un objeto por ciudad; quita espacios, pasa a minúscula y capitaliza la primera letra; inicia cada total en 0. |
 
-precio: número. Es lo que cuesta una unidad, en pesos colombianos.
+Probé cada función con los datos completos, una venta (id 1) y un arreglo vacío. `valorVenta` recibe una fila, no un arreglo; con id 1 da 84.000. En vacío: `totalVendido`, `unidadesVendidas`, `ticketPromedio` y `ventasPorCiudad` dan 0; `ventaMayor`, `null` (0 no sería un registro). Resultados (completo / id 1 / vacío):
 
-## Casos borde detectados
+| Función | Resultados |
+|---|---|
+| `totalVendido` | 985.000 / 84.000 / 0 |
+| `unidadesVendidas` | 21 / 2 / 0 |
+| `ventaMayor` | id 10 / id 1 / `null` |
+| `ticketPromedio` | 89.545,45 / 84.000 / 0 |
+| `ventasPorCiudad` (Medellín) | 356.000 / 84.000 / 0 |
 
-Ciudad escrita distinto. En el id 5 la ciudad aparece como medellín, en minúscula, mientras que en los demás registros es Medellín. Para JavaScript son dos textos distintos, así que al agrupar por ciudad las ventas de Medellín quedarían partidas en dos. Decisión: voy a normalizar la ciudad al procesar los datos, quitando espacios sobrantes y dejando la primera letra en mayúscula, para que las dos formas cuenten como la misma ciudad. No voy a modificar datos.js, la corrección se hace en analitica.js.
+### Trazas manuales
 
-Cantidad en cero. El id 8 tiene cantidad 0, o sea que no hubo unidades vendidas. No es una venta real, pero si se deja entra en el conteo de transacciones y baja el promedio por venta. Decisión: voy a excluir los registros con cantidad 0 de todos los cálculos de ventas. El registro se queda en datos.js tal como vino.
+**`totalVendido`** inicia en 0; se omite id 8 (cantidad 0).
 
-Clientes repetidos y cliente sin compra real. El cliente C01 aparece en tres registros (ids 1, 4 y 11), y C02 y C03 aparecen dos veces cada uno. Si cuento registros, el número de clientes sale inflado. Además, C06 solo aparece en el id 8, que tiene cantidad 0, así que en la práctica no compró nada. Decisión: voy a contar clientes únicos, no filas, y lo haré después de excluir los registros con cantidad 0, de modo que C06 no cuente como cliente que compró.
+| id | Cant. | Precio | Valor | Total |
+|---:|---:|---:|---:|---:|
+| 1 | 2 | 42.000 | 84.000 | 84.000 |
+| 2 | 1 | 26.000 | 26.000 | 110.000 |
+| 3 | 1 | 95.000 | 95.000 | 205.000 |
+| 4 | 1 | 42.000 | 42.000 | 247.000 |
+| 5 | 3 | 45.000 | 135.000 | 382.000 |
+| 6 | 2 | 26.000 | 52.000 | 434.000 |
+| 7 | 1 | 120.000 | 120.000 | 554.000 |
+| 8 | 0 | 42.000 | Omitido | 554.000 |
+| 9 | 2 | 45.000 | 90.000 | 644.000 |
+| 10 | 4 | 42.000 | 168.000 | 812.000 |
+| 11 | 1 | 95.000 | 95.000 | 907.000 |
+| 12 | 3 | 26.000 | 78.000 | 985.000 |
 
-## Plan en pseudocódigo de los indicadores
+Resultado manual: 985.000.
 
-Total vendido
-Recorro: todas las ventas.
-Condición: cantidad mayor que 0.
-Acumulo: cantidad por precio de cada venta.
-Inicio: totalVendido en 0.
+**`ventaMayor`** inicia en `null`:
 
-Unidades vendidas
-Recorro: todas las ventas.
-Condición: cantidad mayor que 0.
-Acumulo: la cantidad de cada venta.
-Inicio: totalUnidades en 0.
+| id | Valor | Comparación | Mayor tras la fila |
+|---:|---:|---|---|
+| 1 | 84.000 | Mayor era `null` | id 1 |
+| 2 | 26.000 | No supera 84.000 | id 1 |
+| 3 | 95.000 | Supera 84.000 | id 3 |
+| 4 | 42.000 | No supera 95.000 | id 3 |
+| 5 | 135.000 | Supera 95.000 | id 5 |
+| 6 | 52.000 | No supera 135.000 | id 5 |
+| 7 | 120.000 | No supera 135.000 | id 5 |
+| 8 | Omitido | Cantidad 0 | id 5 |
+| 9 | 90.000 | No supera 135.000 | id 5 |
+| 10 | 168.000 | Supera 135.000 | id 10 |
+| 11 | 95.000 | No supera 168.000 | id 10 |
+| 12 | 78.000 | No supera 168.000 | id 10 |
 
-Venta más grande
-Recorro: todas las ventas.
-Condición: cantidad mayor que 0 y cantidad por precio mayor que el máximo que llevo.
-Guardo: el valor más alto encontrado y el id de esa venta.
-Inicio: mayorValor en 0 y mayorId sin valor.
+Resultado manual y del programa: id 10, valor 168.000; coincide con la traza. `totalVendido` también dio 985.000.
 
-Ticket promedio
-Recorro: todas las ventas.
-Condición: cantidad mayor que 0.
-Cuento y acumulo: cuento las ventas válidas y sumo cantidad por precio de cada una.
-Inicio: cantidadVentas en 0 y sumaValores en 0.
-Al terminar: si cantidadVentas es mayor que 0, divido sumaValores entre cantidadVentas; si es 0, el ticket promedio es 0 para no dividir por cero.
+### Qué hace cada grupo de funciones
 
-Ventas por ciudad
-Normalizo: quito los espacios al principio y al final de la ciudad buscada y la paso a minúsculas.
-Recorro: todas las ventas.
-Condición: cantidad mayor que 0 y ciudad normalizada igual a la ciudad buscada.
-Acumulo: cantidad por precio de cada venta que cumple la condición.
-Inicio: total en 0.
-
-Total por ciudad
-Inicio: un objeto vacío para guardar los totales.
-Recorro: todas las ventas.
-Condición: cantidad mayor que 0.
-Normalizo: quito los espacios sobrantes y paso la ciudad a minúsculas; luego dejo la primera letra en mayúscula para usarla como nombre.
-Acumulo: cantidad por precio en la clave de esa ciudad. Si todavía no existe, la inicio en 0.
-Al terminar: devuelvo el objeto con el total de cada ciudad.
-
-En estas seis funciones del reto uso ciclos `for...of`; no uso `map`, `filter` ni `reduce`. Esos métodos aparecen en otras funciones del archivo, correspondientes a ejercicios posteriores.
-
-## Pruebas y arreglo vacío
-
-Probé cada función con tres entradas: el arreglo completo, un arreglo con una sola venta (el id 1) y un arreglo vacío. valorVenta recibe un registro y no un arreglo, así que la probé con el id 1, que da 84000.
-
-Con el arreglo vacío decidí lo siguiente:
-
-totalVendido devuelve 0, porque no hay nada que sumar.
-
-unidadesVendidas devuelve 0, por la misma razón.
-
-ventaMayor devuelve null, porque no existe ningún registro que pueda ser el mayor. Devolver 0 sería confuso, ya que 0 no es un registro.
-
-ticketPromedio devuelve 0, porque dividir entre cero ventas daría NaN. Prefiero un 0 explícito.
-
-ventasPorCiudad devuelve 0, porque no hay ventas en esa ciudad.
-
-Resultados con el arreglo completo, un solo elemento y arreglo vacío:
-
-totalVendido: 985000, 84000, 0
-unidadesVendidas: 21, 2, 0
-ventaMayor: id 10, id 1, null
-ticketPromedio: 89545.45, 84000, 0
-ventasPorCiudad de Medellín: 356000, 84000, 0
-
-## Verificación a mano con tabla de traza
-
-Verifiqué dos resultados siguiendo el ciclo venta por venta. El id 8 se omite porque su cantidad es 0.
-
-### totalVendido
-
-Empieza con total en 0.
-
-| id | cantidad | precio | valor de la venta | total después |
-|----|----------|--------|-------------------|---------------|
-| 1 | 2 | 42000 | 84000 | 84000 |
-| 2 | 1 | 26000 | 26000 | 110000 |
-| 3 | 1 | 95000 | 95000 | 205000 |
-| 4 | 1 | 42000 | 42000 | 247000 |
-| 5 | 3 | 45000 | 135000 | 382000 |
-| 6 | 2 | 26000 | 52000 | 434000 |
-| 7 | 1 | 120000 | 120000 | 554000 |
-| 8 | 0 | 42000 | se omite | 554000 |
-| 9 | 2 | 45000 | 90000 | 644000 |
-| 10 | 4 | 42000 | 168000 | 812000 |
-| 11 | 1 | 95000 | 95000 | 907000 |
-| 12 | 3 | 26000 | 78000 | 985000 |
-
-Resultado a mano: 985000.
-
-### ventaMayor
-
-Empieza con mayor en null.
-
-| id | valor de la venta | comparación | mayor después |
-|----|-------------------|-------------|---------------|
-| 1 | 84000 | mayor es null | id 1 |
-| 2 | 26000 | no supera 84000 | id 1 |
-| 3 | 95000 | supera 84000 | id 3 |
-| 4 | 42000 | no supera 95000 | id 3 |
-| 5 | 135000 | supera 95000 | id 5 |
-| 6 | 52000 | no supera 135000 | id 5 |
-| 7 | 120000 | no supera 135000 | id 5 |
-| 8 | se omite | cantidad 0 | id 5 |
-| 9 | 90000 | no supera 135000 | id 5 |
-| 10 | 168000 | supera 135000 | id 10 |
-| 11 | 95000 | no supera 168000 | id 10 |
-| 12 | 78000 | no supera 168000 | id 10 |
-
-Resultado a mano: la venta mayor es el id 10, con 168000.
-
-Resultado del programa: totalVendido dio 985000 y ventaMayor dio el id 10. Coinciden con la traza a mano.
-
-## Preguntas que responde cada función
-
-valorVenta
-¿Qué recorro? Nada, recibe un solo registro.
-¿Qué filtro? Nada.
-¿Qué transformo? El registro en un número: cantidad por precio.
-¿Qué acumulo? Nada.
-¿Cómo agrupo? No agrupo.
-
-totalVendido y totalVendidoM
-¿Qué recorro? Todas las ventas.
-¿Qué filtro? Las que tienen cantidad mayor que 0.
-¿Qué transformo? Cada venta en su valor, con valorVenta.
-¿Qué acumulo? La suma de esos valores, empezando en 0.
-¿Cómo agrupo? No agrupo, el resultado es un solo número.
-
-unidadesVendidas y unidadesVendidasM
-¿Qué recorro? Todas las ventas.
-¿Qué filtro? Las que tienen cantidad mayor que 0.
-¿Qué transformo? Nada, uso la cantidad tal cual.
-¿Qué acumulo? La suma de las cantidades, empezando en 0.
-¿Cómo agrupo? No agrupo.
-
-ventaMayor
-¿Qué recorro? Todas las ventas.
-¿Qué filtro? Las que tienen cantidad mayor que 0.
-¿Qué transformo? Cada venta en su valor, solo para compararla.
-¿Qué acumulo? No sumo. Guardo el registro con el valor más alto visto hasta ahora, empezando en null.
-¿Cómo agrupo? No agrupo.
-
-ticketPromedio
-¿Qué recorro? Todas las ventas.
-¿Qué filtro? Las que tienen cantidad mayor que 0.
-¿Qué transformo? Cada venta en su valor.
-¿Qué acumulo? Dos cosas: la suma de valores y la cuenta de ventas válidas, ambas empezando en 0. Al final divido, y si no hay ventas válidas devuelvo 0.
-¿Cómo agrupo? No agrupo.
-
-ventasPorCiudad y ventasPorCiudadM
-¿Qué recorro? Todas las ventas.
-¿Qué filtro? Las que tienen cantidad mayor que 0 y cuya ciudad, sin espacios y en minúscula, es igual a la ciudad buscada.
-¿Qué transformo? Cada venta en su valor. También normalizo el texto de la ciudad para poder compararlo.
-¿Qué acumulo? La suma de los valores, empezando en 0.
-¿Cómo agrupo? No agrupo, filtro una sola ciudad.
-
-totalPorCiudad
-¿Qué recorro? Todas las ventas.
-¿Qué filtro? Las que tienen cantidad mayor que 0.
-¿Qué transformo? La ciudad, quitando espacios y dejando la primera letra en mayúscula; y cada venta en su valor.
-¿Qué acumulo? El total de cada ciudad, que empieza en 0 la primera vez que aparece.
-¿Cómo agrupo? Con un objeto cuyas claves son los nombres de ciudad normalizados.
-
-unidadesPorProducto
-¿Qué recorro? Todas las ventas.
-¿Qué filtro? Las que tienen cantidad mayor que 0.
-¿Qué transformo? Nada, uso la cantidad tal cual.
-¿Qué acumulo? Las unidades de cada producto, que empiezan en 0 la primera vez que aparece.
-¿Cómo agrupo? Con un objeto cuyas claves son los nombres de producto.
-
-topProductosPorValor
-¿Qué recorro? Primero todas las ventas y luego la lista de productos agrupados.
-¿Qué filtro? Las ventas con cantidad mayor que 0.
-¿Qué transformo? Cada venta en su valor (cantidad por precio), y cada par producto-total en un objeto con `producto` y `valor`.
-¿Qué acumulo? El valor vendido por producto, empezando cada total en 0.
-¿Cómo agrupo? En un objeto cuyas claves son los productos. Después convierto sus entradas con `Object.entries`, ordeno una copia de la lista de mayor a menor y devuelvo los primeros `k` con `slice`.
+- `totalVendido` / `totalVendidoM`: recorren ventas válidas, convierten cada fila a valor con `valorVenta` y suman desde 0; un número, sin agrupar.
+- `unidadesVendidas` / `unidadesVendidasM`: recorren ventas válidas, suman cantidad desde 0; sin transformación ni agrupación.
+- `ventaMayor`: recorre ventas válidas, compara su valor y conserva el registro máximo desde `null`; no suma ni agrupa.
+- `ticketPromedio`: recorre ventas válidas, acumula suma y cuenta desde 0; divide al final o da 0 si no hay filas; sin grupos.
+- `ventasPorCiudad` / `ventasPorCiudadM`: recorren ventas válidas, normalizan ciudad y filtran una ciudad; suman valores desde 0, sin agrupar.
+- `totalPorCiudad`: recorre ventas válidas, normaliza ciudad y valor, y acumula por clave normalizada en un objeto.
+- `productoEstrellaPorCiudad`: con `Map` anidados cuenta filas válidas por ciudad y producto; devuelve un objeto ciudad → producto más frecuente. En empates conserva el primero visto. Tiempo O(n) promedio y espacio O(n).
+- `primerClienteUnico`: primera pasada cuenta compras válidas por cliente con `Map`; segunda recorre las ventas en orden y devuelve el primer código con conteo 1, o `null` si no existe. Cantidad 0 no cuenta como compra. Tiempo O(n) promedio y espacio O(u), donde u es clientes distintos.
+- `unidadesPorProducto`: suma cantidades válidas por producto en objeto; cada total inicia en 0.
+- `topProductosPorValor`: suma valor por producto; transforma cada par producto-total a `{ producto, valor }`, ordena una copia descendente y devuelve primeros `k` con `slice` (usa `Object.entries`).
 
 ## Errores reportados por la gerente
 
-Una versión preliminar que le compartió un compañero mostraba dos errores. Los reproduje con una entrada concreta desde la terminal y comprobé que mi versión ya no los presenta.
+Reproduje por terminal dos fallos de una versión preliminar compartida por un compañero; la versión actual ya no los presenta.
 
-Error 1: Bogotá aparecía dos veces
+1. **Bogotá aparecía en dos grupos.** Entrada: tres ventas de valor unitario 1.000, cantidades 1, 2 y 3, con ciudades `Bogotá`, `Bogotá ` y `bogotá`. Hipótesis/causa: se usaba el texto sin normalizar como clave, igual que `medellín` del id 5. Prueba: `totalPorCiudad` devolvió una sola clave `Bogotá` con 6.000. Corrección: trim, minúsculas y primera letra mayúscula antes de agrupar.
+2. **Ticket promedio daba `NaN` en un día vacío.** El 2026-09-07 no tiene ventas (la muestra cubre del 1 al 6). Sin protección, 0/0 da `NaN`. Probé `ventasDelDia` para esa fecha: dio arreglo vacío; `ticketPromedio` devolvió 0. Corrección: si no hay ventas válidas devuelve 0 sin dividir.
 
-Síntoma: en el total por ciudad, Bogotá salía como dos grupos distintos, con el total partido en dos.
+## Complejidad: predicción y medición de operaciones
 
-Entrada que lo produce: ventas cuya ciudad está escrita Bogotá, Bogotá con un espacio al final y bogotá en minúscula.
+Las funciones instrumentadas recorren una vez y hacen una cantidad fija de pasos por venta; predije crecimiento lineal (×10 operaciones al multiplicar `n` por 10), sin ciclos anidados. `totalVendidoConteo`: visita y comparación de cantidad, 2n. `ventaMayorConteo`: visita y comparación de cantidad, más una o dos comparaciones si es válida, entre 2n y 4n; estimé ×10 o casi, pues la primera venta válida compara una vez menos. `totalPorCiudadConteo`: visita, comparación de cantidad y, si válida, consulta de ciudad: hasta 3n; pocas ciudades no cambian el conteo. Si las mediciones no daban cerca de ×10, el razonamiento era incorrecto.
 
-Hipótesis: el agrupador usa el texto de la ciudad tal como viene, así que JavaScript trata cada variante como una clave distinta.
-
-Prueba realizada: pasé a totalPorCiudad tres ventas de 1000 con cantidades 1, 2 y 3, escritas con las tres variantes. El resultado tiene una sola clave, Bogotá, con 6000.
-
-Causa: la ciudad no se normalizaba antes de usarla como clave. Es el mismo caso del id 5, que viene como medellín.
-
-Corrección: totalPorCiudad quita los espacios con trim, pasa todo a minúscula y deja la primera letra en mayúscula antes de agrupar. En mi versión el error ya no existe.
-
-Error 2: el ticket promedio daba NaN en un día sin ventas
-
-Síntoma: al filtrar un día sin ventas, el ticket promedio salía NaN.
-
-Entrada que lo produce: el día 2026-09-07, que no tiene ventas porque la muestra va del 1 al 6 de septiembre.
-
-Hipótesis: al no haber ventas, la función divide 0 entre 0, y eso da NaN en JavaScript.
-
-Prueba realizada: filtré el día 2026-09-07 con ventasDelDia, que devolvió un arreglo vacío, y pasé ese arreglo a ticketPromedio. Devolvió 0.
-
-Causa: la división no estaba protegida cuando la cantidad de ventas válidas es 0.
-
-Corrección: ticketPromedio revisa si la cantidad de ventas válidas es 0 y, en ese caso, devuelve 0 sin dividir. En mi versión el error ya no existe.
-
-## Predicción antes de medir
-
-Las tres funciones instrumentadas (totalVendidoConteo, ventaMayorConteo y totalPorCiudadConteo) recorren el arreglo una sola vez, con un solo ciclo, y por cada venta hacen un número fijo de pasos. No hay ciclos dentro de ciclos. Por eso creo que las operaciones crecen en línea recta: si n se multiplica por 10, las operaciones también se multiplican por 10.
-
-totalVendidoConteo: por cada venta cuenta una visita y una comparación (cantidad mayor que 0), es decir 2 por venta, 2n en total. Con n por 10 pasa de 2n a 20n. Se multiplica por 10.
-
-ventaMayorConteo: por cada venta cuenta la visita y la comparación de cantidad, y si la venta es válida suma una o dos comparaciones más. Son entre 2 y 4 por venta, así que entre 2n y 4n. Creo que también se multiplica por 10, o casi, porque la primera venta válida hace una comparación menos que las demás.
-
-totalPorCiudadConteo: por cada venta cuenta la visita, la comparación de cantidad y, si es válida, la comparación de si la ciudad ya existe. Son hasta 3 por venta, 3n en total. Se multiplica por 10. Las ciudades son pocas y no crecen con n, así que eso no cambia el conteo.
-
-Si al medir no me da más o menos 10 veces en las tres, mi razonamiento tiene un error.
-
-## Resultados y clasificación
-
-Medí con n = 100, 1.000, 10.000 y 100.000:
-
-| n | totalVendido | ventaMayor | totalPorCiudad | primeraVenta |
-|---|---|---|---|---|
+| n | `totalVendido` | `ventaMayor` | `totalPorCiudad` | `primeraVenta` |
+|---:|---:|---:|---:|---:|
 | 100 | 200 | 399 | 300 | 2 |
 | 1.000 | 2.000 | 3.999 | 3.000 | 2 |
 | 10.000 | 20.000 | 39.999 | 30.000 | 2 |
 | 100.000 | 200.000 | 399.999 | 300.000 | 2 |
 
-Mi predicción se cumplió: al multiplicar n por 10, las tres funciones que recorren el arreglo se multiplican por 10 y primeraVenta se queda igual. ventaMayor quedó en 4n - 1, el extremo alto de lo que había predicho, porque en los datos generados todas las ventas son válidas. primeraVenta no la había predicho porque la agregué después.
+Predicción cumplida: las tres de recorrido multiplican operaciones por 10; `primeraVenta`, añadida después y no predicha, queda fija en 2. `ventaMayor` dio 4n−1 (extremo alto) porque los datos generados eran todos válidos.
 
-totalVendidoConteo: O(n). Un solo ciclo, 2 operaciones por venta (2n).
+| Función | Complejidad y conteo |
+|---|---|
+| `totalVendidoConteo` | O(n), un ciclo, 2n operaciones. |
+| `ventaMayorConteo` | O(n), un ciclo, hasta 4n (medido 4n−1). |
+| `totalPorCiudadConteo` | O(n), un ciclo, hasta 3n. |
+| `primeraVentaConteo` | O(1), sin ciclo, siempre 2 operaciones. |
 
-ventaMayorConteo: O(n). Un solo ciclo, hasta 4 operaciones por venta (4n - 1).
+Ninguna es O(n²): sin ciclos dentro de ciclos, ×10 en `n` no produce ×100 operaciones.
 
-totalPorCiudadConteo: O(n). Un solo ciclo, hasta 3 operaciones por venta (3n).
+## Clientes recurrentes
 
-primeraVentaConteo: O(1). No tiene ciclo y siempre hace 2 operaciones, sin importar n.
+### Problema, casos y optimización
 
-Ninguna es O(n²): no hay ciclos dentro de ciclos, y si los hubiera, al multiplicar n por 10 las operaciones se multiplicarían por 100, no por 10.
+Entrada: ventas con código de cliente y cantidad. Salida: clientes con más de una compra, sin repetir, contando solo filas con cantidad > 0 (cada fila cuenta como compra, aunque tenga varias unidades). No modifico ventas y conservo orden de primera aparición. Meta: menos de 1 s con 100.000 ventas.
 
-## Traza de la versión original de clientesRecurrentes
+| Entrada | Resultado esperado |
+|---|---|
+| Arreglo vacío | `[]` |
+| `C01` | `[]` |
+| `C01`, `C02` | `[]` |
+| `C01`, `C01`, `C01` | `[C01]` |
+| `C02`, `C01`, `C02`, `C01` | `[C02, C01]` |
+| `C01` cantidad 0 y `C01` cantidad 1 | `[]` |
 
-Esta traza es de la versión original, que comparaba cada venta con las que venían después. Usé cinco ventas: los ids 1, 2, 3, 4 y 5. En ese orden, sus clientes son C01, C02, C03, C01 y C04.
+Se comparan códigos literalmente: `C01` y `c01` son distintos.
 
-| Venta de afuera | Se compara con | ¿Mismo cliente? |
+La versión original comparaba cada venta con las siguientes: n(n−1)/2 pares, O(n²). Para 5 ventas (ids 1–5: C01, C02, C03, C01, C04), la traza fue:
+
+| Venta exterior | Comparada con | ¿Igual? |
 |---|---|---|
 | id 1 (C01) | id 2 (C02) | No |
 | id 1 (C01) | id 3 (C03) | No |
-| id 1 (C01) | id 4 (C01) | Sí, se agrega C01 |
+| id 1 (C01) | id 4 (C01) | Sí; agrega C01 |
 | id 1 (C01) | id 5 (C04) | No |
 | id 2 (C02) | id 3 (C03) | No |
 | id 2 (C02) | id 4 (C01) | No |
@@ -291,109 +158,77 @@ Esta traza es de la versión original, que comparaba cada venta con las que ven�
 | id 3 (C03) | id 5 (C04) | No |
 | id 4 (C01) | id 5 (C04) | No |
 
-En total hizo 10 comparaciones entre clientes y devolvió C01. Para n ventas, la primera se compara con n−1 ventas, la segunda con n−2, y así hasta la última pareja. Entonces hace (n−1) + (n−2) + ... + 1 = n(n−1)/2 comparaciones. Con cinco ventas da 5×4/2 = 10; al crecer n, el número de comparaciones crece aproximadamente como n².
+Hizo 10 comparaciones y devolvió C01; la suma (n−1)+(n−2)+…+1 = n(n−1)/2, que con 5 da 5×4/2=10 y crece como n². Además, cada coincidencia podía provocar otro recorrido con `recurrentes.includes`; su peor caso total puede llegar a O(n³), no queda garantizada en O(n²). En arreglo ordenado desfavorablemente, esa búsqueda adicional puede elevar el peor caso. La memoria original es O(n).
 
-## Tiempo de la versión original de clientesRecurrentes
+Para optimizar, guardo quién apareció: `comprasPorCliente` suma compras válidas en un `Map`; `clientesRecurrentes` devuelve clientes con cuenta >1. `clientesRecurrentesSet` usa dos `Set` (vistos y repetidos) y consulta `size` para devolver `[]` enseguida si no hay repetidos. Las tres mantienen orden de primera aparición y no modifican ventas. `Map` y `Set` hacen `has`/`get`/`set`/`add` en O(1) promedio; las nuevas versiones son O(n) promedio y usan O(u), donde `u` es clientes distintos (peor caso O(n)).
 
-Medí la versión original con `console.time` y `console.timeEnd`, usando el generador del MiniReto 5. Dejé la generación fuera del cronómetro y repetí la medición para reducir el efecto de la primera ejecución. Los tiempos cambian un poco entre arreglos aleatorios y entre ejecuciones; estos son valores aproximados:
+Ejemplos de comparación: con datos del Día 1 (12 ventas), las tres devolvieron 3 clientes; con 5.000 ventas generadas, devolvieron 1.324 cada una. Comparé las salidas tras ordenarlas y revisé los casos borde anteriores.
 
-| Ventas (n) | Tiempo aproximado | Comparado con el tamaño anterior |
+### Medición, estimación y conclusión
+
+Medí la original con `console.time`/`console.timeEnd` y el generador del MiniReto 5; generación fuera del cronómetro y mediciones repetidas para reducir el efecto de la primera ejecución. Valores aproximados, variables según datos aleatorios y corrida:
+
+| n | Tiempo original | Salto vs. tamaño previo |
 |---:|---:|---:|
 | 1.000 | 0,002 s | — |
-| 2.000 | 0,009 s | cerca de 4 veces |
-| 4.000 | 0,032 s | cerca de 4 veces |
-| 8.000 | 0,139 s | cerca de 4 veces |
-| 16.000 | 0,70 s | cerca de 5 veces |
+| 2.000 | 0,009 s | Cerca de 4× |
+| 4.000 | 0,032 s | Cerca de 4× |
+| 8.000 | 0,139 s | Cerca de 4× |
+| 16.000 | 0,70 s | Cerca de 5× |
 
-En general, al duplicar las ventas el tiempo se acerca a cuatro veces, como cabe esperar de un crecimiento cuadrático. El último salto fue algo mayor; además de las comparaciones entre pares, `includes` vuelve a recorrer la lista de clientes repetidos, y el generador produce arreglos aleatorios. Por eso el tiempo medido no sigue una proporción exacta en cada salto.
+Al duplicar `n`, los pares se cuadruplican; `includes` y la aleatoriedad explican variaciones. Con 16.000 ventas, proyecté 100.000 en ~27 s (menos de 2 min); medí 40,3 s. Extrapolando desde esa medición y suponiendo crecimiento cuadrático, 1.000.000 tomaría ~67 min. Es aproximado: la distribución de clientes y `includes` pueden apartarlo de esa regla.
 
-Al duplicar n, hay cuatro veces más pares de ventas que comparar. Eso explica el crecimiento cuadrático de las comparaciones. La búsqueda adicional de `includes` puede aumentar el tiempo y, en un arreglo ordenado de forma desfavorable, el peor caso de la función puede llegar a O(n³).
+El compañero observó que la proyección depende de los datos; confirmé que era aproximada y lo aclaré en el informe.
 
-## Estimación de la versión original
+Ya sustituí la búsqueda repetida por conteo con `Map`; con 100.000 ventas generadas dio cerca de 0,01 s. En mediciones actuales: `comprasPorCliente` ~0,004 s, `clientesRecurrentes` ~0,010 s y `clientesRecurrentesSet` ~0,007 s; ambas opciones de recurrentes cumplen la meta de menos de un segundo.
 
-Con 16.000 ventas, la función tardó cerca de 0,70 s. Proyectando ese dato con crecimiento cuadrático, 100.000 tomaría unos 27 s, por debajo de dos minutos; la ejecuté y tardó 40,3 s. A partir de esa medición, al multiplicar n por 10, estimo que 1.000.000 tardaría cerca de 67 minutos, también suponiendo crecimiento cuadrático. Es una proyección aproximada: `includes` puede hacer que el tiempo real se aparte de esa regla, sobre todo con otra distribución de clientes.
+Comparación adicional de tiempos:
 
-## Costo oculto de la versión original
+| n | Original | `Map` | `Set` |
+|---:|---:|---:|---:|
+| 1.000 | 3,6 ms | 0,3 ms | 0,2 ms |
+| 10.000 | 213 ms | 1,3 ms | 0,7 ms |
+| 100.000 | ~40 s (medición anterior) | 10 ms | 7 ms |
 
-Además de comparar las ventas por pares, cuando encuentra dos ventas del mismo cliente la función busca ese cliente con `recurrentes.includes`. Esa búsqueda también recorre un arreglo. En el peor caso puede revisar hasta n clientes y ejecutarse para muchos pares repetidos; por eso el costo total puede llegar a O(n³). La función no queda garantizada como O(n²): esa sería la complejidad si no tuviera esa búsqueda adicional. En las mediciones, el tiempo también depende de cuántos clientes se repiten.
+La original no se volvió a correr con 100.000; una prueba anterior tardó cerca de 40 s (en otra medición se registraron 40,3 s). Los tiempos varían por los datos aleatorios. A 100.000, `Map` y `Set` terminan en milisegundos, muy debajo de la meta.
 
-## Conclusión para la gerente
+| n | Pares de la original | Trabajo `Map` | Trabajo `Set` |
+|---:|---:|---|---|
+| 1.000 | 499.500 | O(1.000 + u), lineal | O(1.000 + u), lineal |
+| 10.000 | 49.995.000 | O(10.000 + u), lineal | O(10.000 + u), lineal |
+| 100.000 | 4.999.950.000 | O(100.000 + u), lineal | O(100.000 + u), lineal |
 
-La versión original se demoraba porque comparaba muchas combinaciones de clientes y volvía a buscar si ya había encontrado cada uno. Ya cambié esa búsqueda por un conteo con `Map`; con 100.000 ventas generadas tardó cerca de 0,01 segundos.
+Como `u` ≤ `n`, n+u crece linealmente; la original compara pares O(n²) y `includes` puede subir el peor caso a O(n³). La mejora usa memoria O(u), hasta O(n), para recordar clientes; evita recorrer la lista en cada búsqueda.
 
-## Recorridos y arreglos de las dos versiones
+## Combos de tarjeta regalo: fuerza bruta
 
-`totalCiudadCadena` pasa por una cadena de métodos: primero normaliza todas las ventas con `map`, luego `filter` revisa todas para quedarse con las de la ciudad indicada, y el segundo `map` y `reduce` recorren solo las que pasaron el filtro. En total son cuatro pasos sobre sus arreglos, aunque los dos últimos pueden ser más cortos. Crea tres arreglos nuevos: las ventas normalizadas, las filtradas y sus valores. Su tiempo es O(n) y el espacio adicional es O(n).
+`comboRegalo(catalogo, valor)` resuelve primero por fuerza bruta: dos ciclos prueban todos los pares distintos. El segundo empieza en `i + 1`, así no compara un producto consigo mismo ni repite el par al revés. Si la suma de precios coincide con `valor`, guarda ambos nombres. Para los 8 productos y la tarjeta de 87.000 devuelve `[["Origen Huila 500 g", "Origen Sierra 500 g"]]`.
 
-`totalCiudadUnaPasada` recorre las ventas una vez con un ciclo y no crea arreglos nuevos. Su tiempo también es O(n), pero usa O(1) de espacio adicional porque solo guarda el total y la ciudad normalizada que está revisando.
+Con n productos revisa n(n−1)/2 pares, por tanto el tiempo es O(n²). Usa O(1) de espacio auxiliar; los m combos guardados ocupan O(m), hasta O(n²) en el peor caso.
 
-Las dos funciones son O(n) en tiempo. Si se cuenta cada etapa como si pasara por las n ventas, la cadena hace O(4n), que se simplifica a O(n) porque se quita la constante 4. En la práctica sus dos últimas etapas ven solo las ventas filtradas. La versión de un ciclo visita cada venta una vez y también queda en O(n).
+### Búsqueda optimizada con `Map`
 
-## Complejidad espacial de las funciones
+`comboRegaloOptimizado(catalogo, valor)` recorre el catálogo una vez. Para cada producto calcula `valor - precio` y consulta si ese complemento ya está en el `Map`; si está, devuelve los dos nombres. Si no, guarda el precio y el nombre actuales. Al terminar sin coincidencias devuelve `null`. Así no combina un producto consigo mismo: la consulta ocurre antes de guardar el producto actual. Para 87.000 devuelve `Origen Huila 500 g` y `Origen Sierra 500 g`.
 
-En esta clasificación no cuento el arreglo de ventas que recibe cada función, solo la memoria adicional que usa. Son O(1) las que guardan una cantidad fija de datos, sin importar cuántas ventas reciban:
+Con n productos, el tiempo es O(n) promedio (consultas e inserciones de `Map`) y el espacio adicional O(n), por los precios guardados. A diferencia de la fuerza bruta, devuelve el primer par encontrado, no una lista de todos los pares.
 
-`valorVenta`, `totalVendido`, `unidadesVendidas`, `ventaMayor`, `ticketPromedio`, `ventasPorCiudad`, `totalCiudadUnaPasada`, `totalVendidoConteo`, `ventaMayorConteo` y `primeraVentaConteo`.
+Probé la versión optimizada con estos valores: 87.000 devuelve `["Origen Huila 500 g", "Origen Sierra 500 g"]`; 61.000 devuelve `["Origen Nariño 250 g", "Taza de cerámica"]`; 62.000 devuelve `null` (sin combinación).
 
-Usan O(n) de espacio adicional las que crean arreglos o guardan resultados que pueden crecer con las ventas:
+Traza para 87.000 (el catálogo se recorre en su orden; el mapa guarda precio → producto):
 
-`totalVendidoM`, `unidadesVendidasM` y `ventasPorCiudadM` crean un arreglo con `filter`. `totalCiudadCadena` crea tres arreglos intermedios con sus `map` y `filter`. `ventasDelDia` guarda las ventas que coinciden en otro arreglo. `comprasPorCliente` y las dos versiones de `clientesRecurrentes` guardan datos por cliente distinto.
+| Producto actual | Precio | Complemento buscado | ¿Está en Map? | Acción / resultado |
+|---|---:|---:|---|---|
+| Origen Nariño 250 g | 26.000 | 61.000 | No | Guarda 26.000 → Origen Nariño 250 g |
+| Origen Huila 500 g | 42.000 | 45.000 | No | Guarda 42.000 → Origen Huila 500 g |
+| Origen Sierra 500 g | 45.000 | 42.000 | Sí | Devuelve Huila 500 g y Sierra 500 g; termina |
 
-`totalPorCiudad` y `totalPorCiudadConteo` guardan un total por ciudad en un objeto. Si hay c ciudades distintas, usan O(c) espacio; en el peor caso c puede crecer hasta n, así que se clasifican como O(n). `unidadesPorProducto` hace lo mismo con los productos distintos. `topProductosPorValor` también guarda los totales por producto y crea arreglos para ordenar la lista; si hay p productos distintos, usa O(p), que en el peor caso es O(n). Aunque al final solo devuelva los primeros k, antes construye y ordena la lista completa.
+La búsqueda se detiene en la tercera fila; los productos posteriores no se recorren.
 
-## Versión de totalCiudad que dejo en el motor
+## Complejidad de las funciones de la campaña
 
-Para el reporte me quedo con `totalCiudadUnaPasada`: se entiende con facilidad y no crea arreglos temporales. Mantengo `totalCiudadCadena` para comparar los enfoques; también es legible y da el mismo resultado, pero reserva tres arreglos intermedios. Las dos son O(n) en tiempo, así que para una lista grande prefiero la que usa O(1) de espacio adicional.
-
-## Revisión de un compañero
-
-Observación: La proyección puede cambiar según los datos.
-Respuesta: Sí, es aproximada y depende de las ventas generadas.
-Lo aclaré en el informe.
-
-## Método de resolución: clientes recurrentes
-
-### Entender el problema
-
-La entrada es un arreglo de ventas con un código de cliente y una cantidad. La salida es una lista con los clientes que hicieron más de una compra, sin repetirlos. Solo cuento ventas con cantidad mayor que cero; cada fila válida cuenta como una compra, aunque tenga varias unidades. No modifico el arreglo y conservo el orden en que apareció cada cliente. La meta es tardar menos de un segundo con 100.000 ventas.
-
-### Ejemplos y casos borde
-
-| Clientes en las ventas | Resultado esperado |
-|---|---|
-| arreglo vacío | `[]` |
-| `C01` | `[]` |
-| `C01`, `C02` | `[]` |
-| `C01`, `C01`, `C01` | `[C01]` |
-| `C02`, `C01`, `C02`, `C01` | `[C02, C01]` |
-| `C01` con cantidad 0 y `C01` con cantidad 1 | `[]` |
-
-Los códigos se comparan tal como vienen; `C01` y `c01` cuentan como clientes distintos.
-
-### Fuerza bruta
-
-La versión original comparaba cada venta con todas las que venían después. Para n ventas hacía n(n−1)/2 comparaciones de pares. Además, al encontrar un cliente repetido, `includes` volvía a recorrer la lista de clientes repetidos. Las comparaciones de pares ya cuestan O(n²), y con esas búsquedas repetidas el peor caso llega a O(n³). La memoria adicional es O(n).
-
-### Idea de optimización
-
-En vez de comparar cada venta con las demás, guardo quién ya apareció. La versión `Map` usa `has`, `get` y `set` para actualizar el conteo de cada cliente. La versión con dos `Set` usa `has` y `add`; consulta `size` para devolver enseguida una lista vacía si no encontró clientes repetidos.
-
-### Implementación
-
-`comprasPorCliente` recorre las ventas válidas y va sumando una compra al cliente en el `Map`. Después, `clientesRecurrentes` devuelve quienes tienen más de una. La versión `clientesRecurrentesSet` hace ese seguimiento con los dos conjuntos. Las tres conservan el orden de primera aparición y no modifican las ventas.
-
-### Verificación y medición
-
-Comparé las tres salidas después de ordenarlas. Con los datos del Día 1 (12 ventas), todas devolvieron 3 clientes. Con 5.000 ventas generadas, todas devolvieron 1.324. También revisé los casos borde de arriba.
-
-En la medición actual con 100.000 ventas generadas, `comprasPorCliente` tardó cerca de 0,004 segundos, `clientesRecurrentes` unos 0,010 y `clientesRecurrentesSet` unos 0,007. Las dos versiones de recurrentes quedaron bajo el segundo que pide el marketplace.
-
-La mejora usa memoria para recordar clientes: O(u), donde u es la cantidad de clientes distintos; en el peor caso, O(n). A cambio, el `Map` y los `Set` encuentran clientes en O(1) en promedio, y las versiones nuevas tardan O(n) en promedio. La versión original hacía n(n−1)/2 comparaciones de pares (O(n²)); además, `includes` podía llevar su peor caso a O(n³).
-
-## Campaña de fin de año: combos para la tarjeta regalo
-
-### Fuerza bruta
-
-La primera versión de `comboRegalo(catalogo, valor)` revisa los productos de dos en dos. El segundo ciclo empieza justo después del primero, así no compara un producto consigo mismo ni vuelve a revisar el mismo par al revés. Si los dos precios suman el valor de la tarjeta, guarda los nombres de ambos productos.
-
-Con n productos, revisa n(n−1)/2 pares; por eso el tiempo es O(n²). Aparte de la lista de resultados, solo necesita O(1) de espacio. Si encuentra m combos, guardar esos resultados ocupa O(m); en el peor caso podrían ser O(n²).
+| Función | Tiempo | Espacio adicional | Motivo |
+|---|---|---|---|
+| `comboRegalo` | O(n²) | O(m), más O(1) auxiliar | Prueba n(n−1)/2 pares y guarda m coincidencias. |
+| `comboRegaloOptimizado` | O(n) promedio | O(n) | Una pasada con consultas e inserciones en `Map`; puede guardar hasta n precios. |
+| `productoEstrellaPorCiudad` | O(n) promedio | O(n) | Cuenta y luego revisa las combinaciones ciudad-producto; ambas sumas de recorridos son como máximo proporcionales a n. |
+| `primerClienteUnico` | O(n) promedio | O(u), hasta O(n) | Dos pasadas y un `Map` con u clientes distintos. |
