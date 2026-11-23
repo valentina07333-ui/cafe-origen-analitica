@@ -253,9 +253,9 @@ primeraVentaConteo: O(1). No tiene ciclo y siempre hace 2 operaciones, sin impor
 
 Ninguna es O(n²): no hay ciclos dentro de ciclos, y si los hubiera, al multiplicar n por 10 las operaciones se multiplicarían por 100, no por 10.
 
-## Traza de clientesRecurrentes
+## Traza de la versión original de clientesRecurrentes
 
-Para revisar los clientes repetidos usé cinco ventas: los ids 1, 2, 3, 4 y 5. En ese orden, sus clientes son C01, C02, C03, C01 y C04. La función compara cada venta con las que vienen después; no repite pares.
+Esta traza es de la versión original, que comparaba cada venta con las que venían después. Usé cinco ventas: los ids 1, 2, 3, 4 y 5. En ese orden, sus clientes son C01, C02, C03, C01 y C04.
 
 | Venta de afuera | Se compara con | ¿Mismo cliente? |
 |---|---|---|
@@ -272,7 +272,7 @@ Para revisar los clientes repetidos usé cinco ventas: los ids 1, 2, 3, 4 y 5. E
 
 En total hizo 10 comparaciones entre clientes y devolvió C01. Para n ventas, la primera se compara con n−1 ventas, la segunda con n−2, y así hasta la última pareja. Entonces hace (n−1) + (n−2) + ... + 1 = n(n−1)/2 comparaciones. Con cinco ventas da 5×4/2 = 10; al crecer n, el número de comparaciones crece aproximadamente como n².
 
-## Tiempo de ejecución de clientesRecurrentes
+## Tiempo de la versión original de clientesRecurrentes
 
 Medí la función con `console.time` y `console.timeEnd`, usando ventas generadas para cada tamaño. El tiempo empieza después de generar el arreglo, así que mide solo la función. Estos fueron los resultados de mi ejecución:
 
@@ -288,17 +288,17 @@ Los tiempos pueden cambiar un poco en otra ejecución. Aun así, se ve que al du
 
 Cuando duplico las ventas, el tiempo aumenta más que el doble. Por ejemplo, con 8.000 tarda cerca de 0,1 s y con 16.000, cerca de 0,6 s. Esto se relaciona con O(n²), porque al duplicar n hay aproximadamente cuatro veces más pares de ventas que comparar. Los tiempos están redondeados, así que la proporción es aproximada.
 
-## Estimación para arreglos más grandes
+## Estimación de la versión original
 
 Con el resultado de 16.000 ventas (cerca de 0,6 s), calculé que 100.000 tardaría unos 23 s si el tiempo crece como n². Como esa estimación es menor a dos minutos, ejecuté la función: tardó cerca de 29 s. Para 1.000.000, usando ese último resultado, calculo alrededor de 48 minutos. Es una estimación; puede variar según los datos generados y el computador.
 
-## Costo de `recurrentes.includes`
+## Costo oculto de la versión original
 
 Además de comparar las ventas por pares, cuando encuentra dos ventas del mismo cliente la función busca ese cliente con `recurrentes.includes`. Esa búsqueda también recorre un arreglo. En el peor caso puede revisar hasta n clientes y ejecutarse para muchos pares repetidos; por eso el costo total puede llegar a O(n³). La función no queda garantizada como O(n²): esa sería la complejidad si no tuviera esa búsqueda adicional. En las mediciones, el tiempo también depende de cuántos clientes se repiten.
 
 ## Conclusión para la gerente
 
-El reporte se demora más cuando hay muchas ventas porque revisa muchas combinaciones de clientes y vuelve a buscar si ya encontró a cada uno. Por eso, al aumentar las ventas, el tiempo puede crecer mucho más rápido que la cantidad de datos. Para que el reporte siga respondiendo rápido, conviene evitar repetir esas búsquedas.
+La versión original se demoraba porque comparaba muchas combinaciones de clientes y volvía a buscar si ya había encontrado cada uno. Ya cambié esa búsqueda por un conteo con `Map`; con 100.000 ventas generadas tardó cerca de 0,01 segundos.
 
 ## Recorridos y arreglos de las dos versiones
 
@@ -316,7 +316,7 @@ En esta clasificación no cuento el arreglo de ventas que recibe cada función, 
 
 Usan O(n) de espacio adicional las que crean arreglos o guardan resultados que pueden crecer con las ventas:
 
-`totalVendidoM`, `unidadesVendidasM` y `ventasPorCiudadM` crean un arreglo con `filter`. La versión en cadena que comparé, `totalCiudadCadena`, crea arreglos intermedios con sus `map` y `filter`; decidí no dejarla en el motor. `ventasDelDia` guarda las ventas que coinciden en otro arreglo. `clientesRecurrentes` guarda los clientes repetidos.
+`totalVendidoM`, `unidadesVendidasM` y `ventasPorCiudadM` crean un arreglo con `filter`. La versión en cadena que comparé, `totalCiudadCadena`, crea arreglos intermedios con sus `map` y `filter`; decidí no dejarla en el motor. `ventasDelDia` guarda las ventas que coinciden en otro arreglo. `comprasPorCliente` y las dos versiones de `clientesRecurrentes` guardan datos por cliente distinto.
 
 `totalPorCiudad` y `totalPorCiudadConteo` guardan un total por ciudad en un objeto. Si hay c ciudades distintas, usan O(c) espacio; en el peor caso c puede crecer hasta n, así que se clasifican como O(n). `unidadesPorProducto` hace lo mismo con los productos distintos. `topProductosPorValor` también guarda los totales por producto y crea arreglos para ordenar la lista; si hay p productos distintos, usa O(p), que en el peor caso es O(n). Aunque al final solo devuelva los primeros k, antes construye y ordena la lista completa.
 
@@ -329,3 +329,38 @@ Me quedo con `totalCiudadUnaPasada`. La versión con `map` y `filter` se lee bie
 Observación: La proyección puede cambiar según los datos.
 Respuesta: Sí, es aproximada y depende de las ventas generadas.
 Lo aclaré en el informe.
+
+## Método de resolución: clientes recurrentes
+
+### Entender el problema
+
+La entrada es un arreglo de ventas con un código de cliente y una cantidad. La salida es una lista con los clientes que hicieron más de una compra, sin repetirlos. Solo cuento ventas con cantidad mayor que cero; cada fila válida cuenta como una compra, aunque tenga varias unidades. No modifico el arreglo y conservo el orden en que apareció cada cliente. La meta es tardar menos de un segundo con 100.000 ventas.
+
+### Casos borde
+
+| Clientes en las ventas | Resultado esperado |
+|---|---|
+| arreglo vacío | `[]` |
+| `C01` | `[]` |
+| `C01`, `C02` | `[]` |
+| `C01`, `C01`, `C01` | `[C01]` |
+| `C02`, `C01`, `C02`, `C01` | `[C02, C01]` |
+| `C01` con cantidad 0 y `C01` con cantidad 1 | `[]` |
+
+Los códigos se comparan tal como vienen; `C01` y `c01` cuentan como clientes distintos.
+
+### Fuerza bruta
+
+La versión original comparaba cada venta con todas las que venían después. Para n ventas hacía n(n−1)/2 comparaciones de pares. Además, al encontrar un cliente repetido, `includes` volvía a recorrer la lista de clientes repetidos. Las comparaciones de pares ya cuestan O(n²), y con esas búsquedas repetidas el peor caso llega a O(n³). La memoria adicional es O(n).
+
+### Idea y cambio
+
+En vez de comparar ventas entre sí, `comprasPorCliente` recorre las ventas y va sumando una compra al cliente correspondiente en un `Map`. Después, `clientesRecurrentes` devuelve los que tienen más de una. Las consultas al mapa son rápidas, así que el recorrido queda en O(n) en promedio. El espacio depende de cuántos clientes distintos haya.
+
+También probé otra forma, `clientesRecurrentesSet`, con dos `Set`: uno para los clientes que ya vi y otro para los que se repiten. Esta versión también ignora las filas con cantidad cero y devuelve los repetidos en el orden original.
+
+### Tiempo y memoria
+
+Para no volver a buscar clientes, ahora guardo información de cada cliente distinto. Eso usa más memoria que guardar solo la lista final: el `Map` o los `Set` pueden crecer hasta el número de clientes distintos (O(u)). A cambio, encontrar o actualizar un cliente toma O(1) en promedio y el tiempo total baja a O(n). Si hay muchos clientes diferentes, esa memoria extra también crece.
+
+Probé los casos de arriba con las dos versiones de recurrentes y dieron las mismas listas. Con 100.000 ventas, `comprasPorCliente` tardó cerca de 0,003 segundos; `clientesRecurrentes`, 0,011; y `clientesRecurrentesSet`, 0,006. Las tres quedaron bajo el segundo que pide el marketplace.

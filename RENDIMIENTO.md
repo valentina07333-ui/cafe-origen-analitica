@@ -2,34 +2,36 @@
 
 Revisé las funciones del motor con 10.000 ventas generadas. En la tabla anoté para qué sirve cada una, cuánto crece su trabajo y qué memoria necesita. No cuento el arreglo de ventas como memoria extra, porque la función ya lo recibe.
 
-Los tiempos son de una sola corrida y pueden salir distintos si se ejecuta otra vez. `totalCiudadCadena` la medí aparte, así que ese tiempo no sirve para compararla directamente con `totalCiudadUnaPasada`. En las funciones que terminan en `Conteo` anoté las operaciones contadas por `medir.js`.
+Los tiempos son de una sola corrida con ventas generadas, así que pueden variar si se vuelve a ejecutar. `clientesRecurrentes` y `clientesRecurrentesSet` se midieron sobre el mismo arreglo. `totalCiudadCadena` es una alternativa que medí para comparar; no está en el motor. En las funciones `Conteo` anoté también las operaciones contadas por `medir.js`.
 
 | Función | Para qué sirve | Tiempo | Memoria extra | Cómo lo veo | Resultado con 10.000 ventas |
 |---|---|---|---|---|---:|
-| `valorVenta` | Calcula el valor de una venta. | O(1) | O(1) | Solo multiplica cantidad por precio. | 0,023 ms |
-| `totalVendido` | Suma el valor de las ventas válidas. | O(n) | O(1) | Revisa las ventas y lleva un total. | 3,472 ms |
-| `unidadesVendidas` | Suma las unidades vendidas. | O(n) | O(1) | Revisa las ventas y lleva la suma. | 0,940 ms |
-| `ventaMayor` | Encuentra la venta de mayor valor. | O(n) | O(1) | Va guardando cuál es la mayor que ha visto. | 0,242 ms |
-| `ticketPromedio` | Calcula el promedio por venta válida. | O(n) | O(1) | Guarda la suma y cuántas ventas contó. | 0,333 ms |
-| `ventasPorCiudad` | Suma las ventas válidas de una ciudad. | O(n) | O(1) | Mira todas las ventas y suma las de esa ciudad. | 7,604 ms |
-| `totalVendidoM` | Suma las ventas válidas con `filter` y `reduce`. | O(n) | O(n) | `filter` arma una lista aparte antes de sumar. | 0,383 ms |
-| `unidadesVendidasM` | Suma unidades con `filter` y `reduce`. | O(n) | O(n) | También arma una lista temporal con `filter`. | 0,757 ms |
-| `ventasPorCiudadM` | Suma las ventas de una ciudad con `filter` y `reduce`. | O(n) | O(n) | Primero guarda las ventas que coinciden y después las suma. | 22,779 ms |
-| `totalCiudadUnaPasada` | Suma las ventas válidas de una ciudad. | O(n) | O(1) | Hace un ciclo y solo guarda el total. | 9,872 ms |
-| `totalCiudadCadena` (alternativa) | Hace lo mismo con `map`, `filter`, `map` y `reduce`. | O(n) | O(n) | Hace cuatro recorridos y va creando listas temporales. | 1,463 ms |
-| `totalPorCiudad` | Suma las ventas por ciudad. | O(n) | O(c), hasta O(n) | Guarda un total por ciudad; en el peor caso hay tantas ciudades como ventas. | 3,630 ms |
-| `unidadesPorProducto` | Suma las unidades de cada producto. | O(n) | O(p), hasta O(n) | Guarda un total por producto; puede haber tantos productos como ventas. | 0,785 ms |
-| `topProductosPorValor` | Ordena los productos por valor y devuelve los primeros k. | O(n + p log p), hasta O(n log n) | O(p), hasta O(n) | Primero suma por producto y luego ordena la lista de productos. | 1,854 ms |
-| `ventasDelDia` | Busca las ventas válidas de una fecha y las devuelve. | O(n) | O(n) | Revisa todas las ventas y arma una lista con las de ese día. | 0,360 ms |
-| `totalVendidoConteo` | Suma las ventas y cuenta visitas y comparaciones. | O(n) | O(1) | Recorre la lista y actualiza el total y el contador. | 0,434 ms; 20.000 operaciones |
-| `ventaMayorConteo` | Busca la venta mayor y cuenta visitas y comparaciones. | O(n) | O(1) | Recorre la lista y se queda con la mayor. | 0,934 ms; 39.999 operaciones |
-| `totalPorCiudadConteo` | Suma por ciudad y cuenta algunas operaciones. | O(n) | O(c), hasta O(n) | Recorre las ventas y guarda un total por ciudad. | 7,475 ms; 30.000 operaciones |
-| `primeraVentaConteo` | Devuelve la primera venta si existe. | O(1) | O(1) | Solo mira si la lista está vacía y accede al primer elemento. | 0,038 ms; 2 operaciones |
-| `clientesRecurrentes` | Encuentra clientes que aparecen más de una vez. | O(n³) en el peor caso | O(n) | Compara ventas entre sí y, cuando encuentra un repetido, busca si ya lo había guardado. | Unos 190 ms |
+| `valorVenta` | Calcula el valor de una venta. | O(1) | O(1) | Solo multiplica cantidad por precio. | 0,038 ms |
+| `totalVendido` | Suma el valor de las ventas válidas. | O(n) | O(1) | Revisa las ventas y lleva un total. | 2,936 ms |
+| `unidadesVendidas` | Suma las unidades vendidas. | O(n) | O(1) | Revisa las ventas y lleva la suma. | 1,166 ms |
+| `ventaMayor` | Encuentra la venta de mayor valor. | O(n) | O(1) | Va guardando cuál es la mayor que ha visto. | 0,416 ms |
+| `ticketPromedio` | Calcula el promedio por venta válida. | O(n) | O(1) | Guarda la suma y cuántas ventas contó. | 1,078 ms |
+| `ventasPorCiudad` | Suma las ventas válidas de una ciudad. | O(n) | O(1) | Mira todas las ventas y suma las de esa ciudad. | 0,958 ms |
+| `totalVendidoM` | Suma las ventas válidas con `filter` y `reduce`. | O(n) | O(n) | `filter` arma una lista aparte antes de sumar. | 11,753 ms |
+| `unidadesVendidasM` | Suma unidades con `filter` y `reduce`. | O(n) | O(n) | También arma una lista temporal con `filter`. | 0,858 ms |
+| `ventasPorCiudadM` | Suma las ventas de una ciudad con `filter` y `reduce`. | O(n) | O(n) | Primero guarda las ventas que coinciden y después las suma. | 1,790 ms |
+| `totalCiudadUnaPasada` | Suma las ventas válidas de una ciudad. | O(n) | O(1) | Hace un ciclo y solo guarda el total. | 1,433 ms |
+| `totalCiudadCadena` (alternativa) | Hace lo mismo con `map`, `filter`, `map` y `reduce`. | O(n) | O(n) | Hace cuatro recorridos y va creando listas temporales. | 2,592 ms |
+| `totalPorCiudad` | Suma las ventas por ciudad. | O(n) | O(c), hasta O(n) | Guarda un total por ciudad; en el peor caso hay tantas ciudades como ventas. | 2,306 ms |
+| `unidadesPorProducto` | Suma las unidades de cada producto. | O(n) | O(p), hasta O(n) | Guarda un total por producto; puede haber tantos productos como ventas. | 1,178 ms |
+| `topProductosPorValor` | Ordena los productos por valor y devuelve los primeros k. | O(n + p log p), hasta O(n log n) | O(p), hasta O(n) | Primero suma por producto y luego ordena la lista de productos. | 1,113 ms |
+| `ventasDelDia` | Busca las ventas válidas de una fecha y las devuelve. | O(n) | O(n) | Revisa todas las ventas y arma una lista con las de ese día. | 0,612 ms |
+| `totalVendidoConteo` | Suma las ventas y cuenta visitas y comparaciones. | O(n) | O(1) | Recorre la lista y actualiza el total y el contador. | 0,563 ms; 20.000 operaciones |
+| `ventaMayorConteo` | Busca la venta mayor y cuenta visitas y comparaciones. | O(n) | O(1) | Recorre la lista y se queda con la mayor. | 0,633 ms; 39.999 operaciones |
+| `totalPorCiudadConteo` | Suma por ciudad y cuenta algunas operaciones. | O(n) | O(c), hasta O(n) | Recorre las ventas y guarda un total por ciudad. | 1,569 ms; 30.000 operaciones |
+| `primeraVentaConteo` | Devuelve la primera venta si existe. | O(1) | O(1) | Solo mira si la lista está vacía y accede al primer elemento. | 0,019 ms; 2 operaciones |
+| `comprasPorCliente` | Cuenta las compras válidas de cada cliente. | O(n) promedio | O(u) | Actualiza un `Map` por cada venta con cantidad mayor que cero. | 0,557 ms |
+| `clientesRecurrentes` | Devuelve los clientes con más de una compra. | O(n) promedio | O(u) | Toma del `Map` los clientes que aparecen más de una vez. | 1,273 ms |
+| `clientesRecurrentesSet` | Hace lo mismo con dos `Set`. | O(n) promedio | O(u) | Uno recuerda quién apareció; el otro, quién se repitió. | 0,697 ms |
 
-Los conteos no incluyen cada instrucción de JavaScript; son las visitas y comparaciones que decidí contar en `medir.js`. `clientesRecurrentes` tardó unos 190 ms con 10.000 ventas. En la bitácora, las corridas cercanas fueron de 8.000 ventas (alrededor de 0,1 s) y 16.000 (alrededor de 0,6 s), así que el resultado queda entre ellas. Son ejecuciones distintas y los tiempos son aproximados.
+Los conteos no incluyen cada instrucción de JavaScript; son las visitas y comparaciones que decidí contar en `medir.js`. `u` representa los clientes distintos. Los tiempos son de una sola corrida y pueden variar, sobre todo en funciones que crean arreglos.
 
-De las dos versiones de `totalCiudad`, me quedé con `totalCiudadUnaPasada`: da el mismo resultado y no crea listas temporales. La función que más puede crecer en tiempo es `clientesRecurrentes`, porque compara ventas entre sí y vuelve a buscar los clientes repetidos.
+De las dos versiones de `totalCiudad`, me quedé con `totalCiudadUnaPasada`: da el mismo resultado y no crea listas temporales. `clientesRecurrentes` ahora usa un `Map`, así que evita comparar cada venta con todas las demás.
 
 ## Proyección
 
@@ -43,10 +45,10 @@ No tiene mucho sentido dar tantos decimales para una estimación. La mayoría de
 | `ventaMayor` | Menos de un segundo |
 | `ticketPromedio` | Menos de un segundo |
 | `ventasPorCiudad` | Menos de un segundo |
-| `totalVendidoM` | Menos de un segundo |
+| `totalVendidoM` | Alrededor de un segundo |
 | `unidadesVendidasM` | Menos de un segundo |
-| `ventasPorCiudadM` | Alrededor de dos segundos |
-| `totalCiudadUnaPasada` | Cerca de un segundo |
+| `ventasPorCiudadM` | Menos de un segundo |
+| `totalCiudadUnaPasada` | Menos de un segundo |
 | `totalCiudadCadena` | Menos de un segundo |
 | `totalPorCiudad` | Menos de un segundo |
 | `unidadesPorProducto` | Menos de un segundo |
@@ -56,22 +58,36 @@ No tiene mucho sentido dar tantos decimales para una estimación. La mayoría de
 | `ventaMayorConteo` | Menos de un segundo |
 | `totalPorCiudadConteo` | Menos de un segundo |
 | `primeraVentaConteo` | Casi inmediato |
-| `clientesRecurrentes` | Alrededor de 50 minutos con los datos generados |
+| `comprasPorCliente` | Menos de una décima de segundo |
+| `clientesRecurrentes` | Alrededor de una décima de segundo, según la medición de 100.000 ventas |
+| `clientesRecurrentesSet` | Menos de una décima de segundo, según la medición de 100.000 ventas |
 
-Para `clientesRecurrentes` me basé en la prueba de 100.000 ventas, que tardó unos 29 segundos. Al llevar esa medida a un millón, da cerca de 50 minutos. Es una aproximación con los datos generados por el proyecto; con otra distribución de clientes podría tardar bastante más.
+Para las funciones O(n), tomé el tiempo de 10.000 ventas y lo multipliqué por 100. Para los conteos de clientes también revisé la prueba de 100.000: un millón de ventas daría cerca de 0,03 segundos en `comprasPorCliente`, 0,1 en `clientesRecurrentes` y menos de una décima en la versión con `Set`. Son estimaciones de una corrida, no garantías.
 
 ## Riesgos
 
-Si mañana hubiera que procesar muchas más ventas, empezaría revisando `clientesRecurrentes`. En la prueba ya tardó unos 29 segundos con 100.000 ventas. Compara las ventas entre sí y, cuando encuentra un cliente repetido, lo vuelve a buscar en la lista. Esa búsqueda adicional puede hacer que el tiempo crezca muchísimo; en el peor caso llega a O(n³).
+Si el catálogo creciera junto con las ventas, revisaría primero `topProductosPorValor`: además de recorrer las ventas, ordena los productos. Con el generador actual hay cinco productos, así que ese riesgo todavía es bajo.
 
-Después miraría `topProductosPorValor`, sobre todo si el catálogo crece. La función ordena los productos y eso se va notando cuando hay muchos distintos. Con el generador actual solo hay cinco, así que por ahora no es el problema principal.
+Después miraría las funciones que guardan listas o agrupaciones: `totalVendidoM`, `unidadesVendidasM`, `ventasPorCiudadM`, `ventasDelDia`, `totalPorCiudad`, `totalPorCiudadConteo`, `unidadesPorProducto` y `comprasPorCliente`. Su tiempo crece en línea con las ventas, pero la memoria que usan también puede crecer. Las dos versiones de clientes recurrentes usan memoria según los clientes distintos y tardan O(n) en promedio; con 100.000 ventas dieron unos 0,011 segundos (`Map`) y 0,006 segundos (`Set`) en esta corrida.
 
-Las funciones que usan `filter` o devuelven listas y agrupaciones (`totalVendidoM`, `unidadesVendidasM`, `ventasPorCiudadM`, `ventasDelDia`, `totalPorCiudad`, `totalPorCiudadConteo` y `unidadesPorProducto`) hacen un recorrido, pero guardan resultados en arreglos u objetos. Si el volumen crece, también crece esa memoria. La alternativa `totalCiudadCadena` hace lo mismo con varios arreglos temporales; la probé, pero no la dejé en el motor.
+Las demás hacen un recorrido y guardan pocos valores, o trabajan en tiempo constante. La alternativa `totalCiudadCadena` crea arreglos temporales; la probé, pero no la dejé en el motor.
 
-El resto me preocupa menos: `totalVendido`, `unidadesVendidas`, `ventaMayor`, `ticketPromedio`, `ventasPorCiudad`, `totalCiudadUnaPasada`, `totalVendidoConteo` y `ventaMayorConteo` recorren las ventas, pero solo van guardando unos pocos valores. `valorVenta` y `primeraVentaConteo` hacen casi lo mismo con pocas ventas que con muchas.
+## Clientes recurrentes después del cambio
 
-## Plan de optimización
+Antes la función comparaba cada venta con las demás. Ahora `comprasPorCliente` lleva la cuenta en un `Map`, y `clientesRecurrentes` usa esos conteos para devolver los clientes repetidos. Dejé también `clientesRecurrentesSet` para hacer lo mismo con dos `Set`. Las dos versiones entregan los clientes en el mismo orden.
 
-En `clientesRecurrentes` se repite trabajo porque compara cada venta con las demás. Y cuando encuentra dos del mismo cliente, `includes` vuelve a buscarlo en la lista para revisar si ya lo había agregado.
+En la prueba con 100.000 ventas, contar las compras tardó unos 0,003 segundos. Obtener los recurrentes tardó unos 0,011 con `Map` y 0,006 con `Set`. Las dos opciones quedaron muy por debajo del segundo; en los casos que probé dieron la misma lista.
 
-Yo guardaría cuántas veces aparece cada cliente en un objeto. Cuando el conteo llegue a dos, lo agregaría a la lista de recurrentes. Así no tendría que comparar todos los pares ni volver a buscar al cliente. Por ahora es solo el plan; la función sigue igual.
+### Comparación de tiempos
+
+Con 1.000 ventas las tres responden rápido. Con 10.000, la versión original ya tarda más de dos décimas de segundo, mientras que `Map` y `Set` tardan apenas un momento. No volví a correr la original con 100.000 ventas: en una prueba anterior se había demorado casi medio minuto. `Map` y `Set` sí las corrí con ese tamaño.
+
+| Ventas | Original | `Map` | `Set` |
+|---:|---:|---:|---:|
+| 1.000 | 3,6 ms | 0,3 ms | 0,2 ms |
+| 10.000 | 213 ms | 1,3 ms | 0,7 ms |
+| 100.000 | cerca de 29 s (medición anterior) | 11 ms | 6 ms |
+
+Los tiempos cambian un poco en cada corrida porque los datos se generan al azar. Pero la diferencia se nota: con 100.000 ventas, `Map` y `Set` terminaron en unos milisegundos, muy por debajo del segundo que pide el marketplace.
+
+La mejora tiene un costo: ahora guardamos una referencia por cada cliente distinto. Eso ocupa memoria, pero evita volver a recorrer listas para encontrar clientes; en promedio, esa búsqueda es constante y el recorrido total crece en línea con las ventas.

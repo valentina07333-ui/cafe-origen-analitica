@@ -202,17 +202,47 @@ function primeraVentaConteo(ventas, contador) {
   return ventas[0];
 }
 
+function comprasPorCliente(ventas) {
+  const conteos = new Map();
+
+  for (const venta of ventas) {
+    if (venta.cantidad <= 0) continue;
+
+    const cliente = venta.cliente;
+    const cantidad = conteos.get(cliente) || 0;
+    conteos.set(cliente, cantidad + 1);
+  }
+
+  return conteos;
+}
+
 function clientesRecurrentes(ventas) {
   const recurrentes = [];
-  for (let i = 0; i < ventas.length; i++) {
-    for (let j = i + 1; j < ventas.length; j++) {
-      if (ventas[i].cliente === ventas[j].cliente &&
-          !recurrentes.includes(ventas[i].cliente)) {
-        recurrentes.push(ventas[i].cliente);
-      }
+  for (const [cliente, compras] of comprasPorCliente(ventas)) {
+    if (compras > 1) {
+      recurrentes.push(cliente);
     }
   }
+
   return recurrentes;
+}
+
+function clientesRecurrentesSet(ventas) {
+  const vistos = new Set();
+  const recurrentes = new Set();
+
+  for (const venta of ventas) {
+    if (venta.cantidad <= 0) continue;
+
+    const cliente = venta.cliente;
+    if (vistos.has(cliente)) {
+      recurrentes.add(cliente);
+    } else {
+      vistos.add(cliente);
+    }
+  }
+
+  return [...vistos].filter((cliente) => recurrentes.has(cliente));
 }
 
 module.exports = {
@@ -234,7 +264,9 @@ module.exports = {
   ventaMayorConteo,
   totalPorCiudadConteo,
   primeraVentaConteo,
+  comprasPorCliente,
   clientesRecurrentes,
+  clientesRecurrentesSet,
 
 
 };
