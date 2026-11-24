@@ -1,6 +1,6 @@
 # Rendimiento
 
-Revisé las funciones del motor con 10.000 ventas generadas. En la tabla anoté para qué sirve cada una, cuánto crece su trabajo y qué memoria necesita. No cuento el arreglo de ventas como memoria extra, porque la función ya lo recibe.
+Medí las funciones que reciben ventas con 10.000 ventas generadas. Las que reciben un catálogo o una lista de días se midieron con esos datos. La tabla explica qué hace cada función, cuánto crece su trabajo y qué memoria necesita. No cuento como memoria extra el arreglo que la función recibe.
 
 Los tiempos son de una sola corrida con ventas generadas, así que pueden variar si se vuelve a ejecutar. `clientesRecurrentes` y `clientesRecurrentesSet` se midieron sobre el mismo arreglo. `totalCiudadCadena` está disponible para comparar los dos enfoques; el reporte usa `totalCiudadUnaPasada`. En las funciones `Conteo` anoté también las operaciones contadas por `medir.js`.
 
@@ -28,6 +28,13 @@ Los tiempos son de una sola corrida con ventas generadas, así que pueden variar
 | `comprasPorCliente` | Cuenta las compras válidas de cada cliente. | O(n) promedio | O(u) | Actualiza un `Map` por cada venta con cantidad mayor que cero. | 0,557 ms |
 | `clientesRecurrentes` | Devuelve los clientes con más de una compra. | O(n) promedio | O(u) | Toma del `Map` los clientes que aparecen más de una vez. | 1,273 ms |
 | `clientesRecurrentesSet` | Hace lo mismo con dos `Set`. | O(n) promedio | O(u) | Uno recuerda quién apareció; el otro, quién se repitió. | 0,697 ms |
+| `comboRegalo` | Prueba parejas del catálogo y devuelve las que suman el valor buscado. | O(p²) | O(m) por las parejas devueltas | Revisa cada pareja distinta. | Catálogo de 8 productos; no usa ventas |
+| `comboRegaloOptimizado` | Busca un complemento con `Map`. | O(p) promedio | O(p) | Recorre el catálogo una vez. | Catálogo de 8 productos; no usa ventas |
+| `productoEstrellaPorCiudad` | Encuentra el producto más frecuente de cada ciudad. | O(n) promedio | O(n) | Cuenta con `Map` anidados. | 3,314 ms |
+| `primerClienteUnico` | Encuentra el primer cliente que compró una sola vez. | O(n) promedio | O(u) | Cuenta clientes y hace una segunda pasada. | 1,184 ms |
+| `mejorSemanaBruta` | Suma desde cero cada bloque de días. | O(n × k) | O(1) | Puede volver a sumar los mismos días. | 2,341 ms con 100.000 días y k=7 |
+| `mejorSemana` | Encuentra el bloque de k días con mayor total. | O(n) | O(1) | Cada paso agrega el día nuevo y resta el que sale. | 1,562 ms con 100.000 días y k=7 |
+| `parMasCercano` | Busca la pareja más cercana sin superar el presupuesto. | O(p log p) | O(p) | Ordena una copia y recorre con dos punteros. | Catálogo de 8 productos; no usa ventas |
 
 Los conteos no incluyen cada instrucción de JavaScript; son las visitas y comparaciones que decidí contar en `medir.js`. `u` representa los clientes distintos y `p` los productos distintos. Los tiempos son de una sola corrida y pueden variar, sobre todo en funciones que crean arreglos.
 
@@ -63,8 +70,26 @@ No tiene mucho sentido dar tantos decimales para una estimación. La mayoría de
 | `comprasPorCliente` | Menos de una décima de segundo |
 | `clientesRecurrentes` | Alrededor de una décima de segundo, según la medición de 100.000 ventas |
 | `clientesRecurrentesSet` | Menos de una décima de segundo, según la medición de 100.000 ventas |
+| `comboRegaloOptimizado` | Casi inmediato; usa el catálogo fijo de 8 productos |
+| `productoEstrellaPorCiudad` | Cerca de 0,33 segundos, estimado al multiplicar por 100 su tiempo con 10.000 ventas |
+| `primerClienteUnico` | Cerca de 0,12 segundos, estimado al multiplicar por 100 su tiempo con 10.000 ventas |
+| `mejorSemana` | Casi inmediato para los 30 días de septiembre usados por el reporte |
+| `parMasCercano` | Casi inmediato; ordena el catálogo fijo de 8 productos |
 
 Para las funciones O(n), tomé el tiempo de 10.000 ventas y lo multipliqué por 100. Para los conteos de clientes también revisé la prueba de 100.000: un millón de ventas daría cerca de 0,04 segundos en `comprasPorCliente`, 0,10 en `clientesRecurrentes` y 0,07 en la versión con `Set`. Son estimaciones de una corrida, no garantías.
+
+## Comparación del reporte v0.1 y v1.0
+
+Medí las dos versiones sobre el mismo arreglo generado; la generación quedó fuera del cronómetro. La línea v0.1 reproduce los cálculos base y la búsqueda original de clientes recurrentes que causaba la demora. La v1.0 calcula el reporte integrado con el conteo optimizado.
+
+| Ventas | Reporte v0.1 | Reporte v1.0 |
+|---:|---:|---:|
+| 10.000 | 313,936 ms | 11,283 ms |
+| 100.000 | 37,466 s | 66,081 ms |
+
+La comparación se ejecuta con `node src/medir.js --comparar-reportes`. En esta máquina, el comando completo `node src/reporte.js 100000` tardó 0,256 s con la salida enviada a `/dev/null`; la medición cambia según el equipo.
+
+El reporte final no llama a las versiones por fuerza bruta: usa `clientesRecurrentes`, `comboRegaloOptimizado` y `mejorSemana`. Las búsquedas sobre el catálogo ordenan como máximo 8 productos, y la ventana mensual revisa 30 días. Ninguna parte del reporte final compara todas las ventas entre sí.
 
 ## Riesgos
 

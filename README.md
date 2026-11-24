@@ -1,30 +1,74 @@
-# Café Origen Analítica
+# Café Origen Analítica v1.0
 
-Un pequeño proyecto en JavaScript para entender las ventas de Café Origen, una tienda de café de origen y accesorios. Toma un registro de ventas (12 líneas, del 1 al 6 de septiembre de 2026) y saca los números que importan en un reporte por consola.
+Motor de análisis de ventas para Café Origen. Resume ventas reales o genera datos de prueba, y muestra resultados claros en la terminal. Está hecho con Node.js y no necesita instalar paquetes externos.
 
-## Cómo correrlo
+## Requisitos
 
-Solo necesitas [Node.js](https://nodejs.org), no hay nada más que instalar.
+- Node.js en una versión LTS.
+- Git para clonar el repositorio.
+
+## Ejecutar
+
+Clona el repositorio y entra a la carpeta:
 
 ```bash
-node src/reporte.js     
-node src/pruebas.js      
-node src/verificar.js   
+git clone https://github.com/valentina07333-ui/cafe-origen-analitica.git
+cd cafe-origen-analitica
 ```
 
-## Qué te cuenta
+Ejecuta el reporte con las 12 ventas de muestra:
 
-- Cuánto se vendió en total y cuántas unidades
-- Cuál fue la venta más grande
-- El ticket promedio
-- Cuánto se vendió por ciudad y por producto
-- Qué productos aportan más dinero
-- Cómo le fue a un día en particular
+```bash
+node src/reporte.js
+```
 
-## Cosas a tener en cuenta
+Para generar y analizar otra cantidad de ventas, pasa un número entero:
 
-- Las ventas con cantidad 0 no cuentan.
-- `medellín` y `Medellín` se tratan como la misma ciudad.
-- Si un día no tuvo ventas, el ticket promedio es 0, no `NaN`.
+```bash
+node src/reporte.js 100000
+```
 
-Las decisiones y los errores que se corrigieron por el camino están en `bitacora.md`.
+El reporte muestra totales, ciudades, productos, clientes recurrentes, productos estrella, sugerencias de productos, el cliente para cupón y la mejor semana. Si no se indica una cantidad, usa las ventas reales de muestra.
+
+## Preguntas que responde
+
+- ¿Cuánto se vendió y cuántas unidades salieron?
+- ¿Cuál fue la venta más grande y cuál es el ticket promedio?
+- ¿Cuánto se vendió por ciudad y qué productos generaron más valor?
+- ¿Qué clientes compraron más de una vez y cuál compró una sola vez?
+- ¿Qué producto se vendió más en cada ciudad?
+- ¿Qué productos suman el valor de una tarjeta regalo o se acercan a un presupuesto?
+- ¿Cuál fue la semana de siete días con mayores ventas?
+- ¿Qué ocurre con un día sin ventas?
+
+## Comprobaciones y mediciones
+
+```bash
+node src/verificar.js
+node src/pruebas.js
+node src/medir.js
+node src/medir.js --comparar-reportes
+```
+
+La última opción compara el cálculo del reporte anterior con el reporte v1.0 usando conjuntos de datos generados de 10.000 y 100.000 ventas. La generación queda fuera del cronómetro.
+La versión anterior incluye la búsqueda lenta de clientes y puede tardar varias decenas de segundos con 100.000 ventas.
+
+## Estructura del proyecto
+
+```text
+src/
+  analitica.js       Funciones de cálculo y optimización
+  catalogo.js        Productos y precios
+  datos.js           Ventas de muestra y ventas diarias de septiembre
+  explorar.js        Exploración de los datos de muestra
+  generador.js       Generación de ventas aleatorias
+  medir.js           Conteo de operaciones y medición de tiempos
+  pruebas.js         Pruebas manuales de indicadores básicos
+  reporte.js         Reporte de negocio v1.0
+  verificar.js       Comparaciones y casos borde
+bitacora.md          Decisiones, trazas y cierre de los MiniRetos
+RENDIMIENTO.md       Complejidades, mediciones y comparación de versiones
+README.md            Guía del producto
+```
+
+Las ventas con cantidad cero no cuentan en los indicadores. Los nombres de ciudad se normalizan al agrupar. Un día sin ventas muestra ceros.

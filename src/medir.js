@@ -1,5 +1,13 @@
 const { generarVentas } = require("./generador");
 const {
+  totalVendido,
+  unidadesVendidas,
+  ventaMayor,
+  ticketPromedio,
+  totalPorCiudad,
+  unidadesPorProducto,
+  topProductosPorValor,
+  ventasDelDia,
   totalVendidoConteo,
   ventaMayorConteo,
   totalPorCiudadConteo,
@@ -8,6 +16,7 @@ const {
   clientesRecurrentes,
   clientesRecurrentesSet,
 } = require("./analitica");
+const { crearReporte } = require("./reporte");
 
 function clientesRecurrentesOriginal(ventas) {
   const recurrentes = [];
@@ -92,4 +101,36 @@ for (const n of tamanosTiempo) {
   console.time(etiquetaCompras);
   comprasPorCliente(ventas);
   console.timeEnd(etiquetaCompras);
+}
+
+if (process.argv.includes("--comparar-reportes")) {
+  function reporteV01(ventas) {
+    totalVendido(ventas);
+    unidadesVendidas(ventas);
+    ventaMayor(ventas);
+    ticketPromedio(ventas);
+    totalPorCiudad(ventas);
+    unidadesPorProducto(ventas);
+    topProductosPorValor(ventas, 3);
+    ventasDelDia(ventas, "2026-09-05");
+    clientesRecurrentesOriginal(ventas);
+  }
+
+  console.log("\nComparación de tiempo de cálculo (generación fuera del cronómetro)");
+  console.log("v0.1 recrea el reporte base y la búsqueda original de clientes recurrentes.");
+  console.log("v1.0 calcula el reporte final con clientes recurrentes optimizados.");
+
+  for (const n of [10000, 100000]) {
+    const ventas = generarVentas(n);
+
+    const etiquetaAnterior = `reporte v0.1 n=${n}`;
+    console.time(etiquetaAnterior);
+    reporteV01(ventas);
+    console.timeEnd(etiquetaAnterior);
+
+    const etiquetaFinal = `reporte v1.0 n=${n}`;
+    console.time(etiquetaFinal);
+    crearReporte(ventas);
+    console.timeEnd(etiquetaFinal);
+  }
 }
