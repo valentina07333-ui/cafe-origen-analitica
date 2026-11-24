@@ -44,39 +44,39 @@ Para el reporte elegí `totalCiudadUnaPasada`: da el mismo resultado y no crea l
 
 ## Proyección
 
-No tiene mucho sentido dar tantos decimales para una estimación. La mayoría de las funciones tardaría menos de un segundo con un millón de ventas. Estas son cuentas aproximadas basadas en las mediciones, no tiempos exactos.
+Para las funciones lineales, multipliqué el tiempo medido con 10.000 ventas por 100. Dejo el resultado de esa operación sin redondearlo. Es una extrapolación de una corrida, no una garantía para otra máquina.
 
-| Función | Tiempo estimado con 1.000.000 de ventas |
+| Función | Proyección con 1.000.000 de ventas |
 |---|---:|
-| `valorVenta` | Casi inmediato |
-| `totalVendido` | Menos de un segundo |
-| `unidadesVendidas` | Menos de un segundo |
-| `ventaMayor` | Menos de un segundo |
-| `ticketPromedio` | Menos de un segundo |
-| `ventasPorCiudad` | Menos de un segundo |
-| `totalVendidoM` | Alrededor de un segundo |
-| `unidadesVendidasM` | Menos de un segundo |
-| `ventasPorCiudadM` | Menos de un segundo |
-| `totalCiudadUnaPasada` | Menos de un segundo |
-| `totalCiudadCadena` | Menos de un segundo |
-| `totalPorCiudad` | Menos de un segundo |
-| `unidadesPorProducto` | Menos de un segundo |
-| `topProductosPorValor` | Menos de un segundo, si siguen siendo pocos productos |
-| `ventasDelDia` | Menos de un segundo |
-| `totalVendidoConteo` | Menos de un segundo |
-| `ventaMayorConteo` | Menos de un segundo |
-| `totalPorCiudadConteo` | Menos de un segundo |
-| `primeraVentaConteo` | Casi inmediato |
-| `comprasPorCliente` | Menos de una décima de segundo |
-| `clientesRecurrentes` | Alrededor de una décima de segundo, según la medición de 100.000 ventas |
-| `clientesRecurrentesSet` | Menos de una décima de segundo, según la medición de 100.000 ventas |
-| `comboRegaloOptimizado` | Casi inmediato; usa el catálogo fijo de 8 productos |
-| `productoEstrellaPorCiudad` | Cerca de 0,33 segundos, estimado al multiplicar por 100 su tiempo con 10.000 ventas |
-| `primerClienteUnico` | Cerca de 0,12 segundos, estimado al multiplicar por 100 su tiempo con 10.000 ventas |
-| `mejorSemana` | Casi inmediato para los 30 días de septiembre usados por el reporte |
-| `parMasCercano` | Casi inmediato; ordena el catálogo fijo de 8 productos |
+| `valorVenta` | 0,038 ms por registro; recibe una venta, no el arreglo |
+| `totalVendido` | 293,6 ms |
+| `unidadesVendidas` | 116,6 ms |
+| `ventaMayor` | 41,6 ms |
+| `ticketPromedio` | 107,8 ms |
+| `ventasPorCiudad` | 95,8 ms |
+| `totalVendidoM` | 1.175,3 ms |
+| `unidadesVendidasM` | 85,8 ms |
+| `ventasPorCiudadM` | 179 ms |
+| `totalCiudadUnaPasada` | 143,3 ms |
+| `totalCiudadCadena` | 259,2 ms |
+| `totalPorCiudad` | 230,6 ms |
+| `unidadesPorProducto` | 117,8 ms |
+| `topProductosPorValor` | 111,3 ms, si se mantienen los 5 productos medidos |
+| `ventasDelDia` | 61,2 ms |
+| `totalVendidoConteo` | 56,3 ms; 2.000.000 operaciones |
+| `ventaMayorConteo` | 63,3 ms; 3.999.999 operaciones |
+| `totalPorCiudadConteo` | 156,9 ms; 3.000.000 operaciones |
+| `primeraVentaConteo` | 0,019 ms; 2 operaciones |
+| `comprasPorCliente` | 55,7 ms |
+| `clientesRecurrentes` | 127,3 ms |
+| `clientesRecurrentesSet` | 69,7 ms |
+| `productoEstrellaPorCiudad` | 331,4 ms |
+| `primerClienteUnico` | 118,4 ms |
+| `comboRegaloOptimizado` | No depende de las ventas: recorre el catálogo fijo de 8 productos |
+| `mejorSemana` | No depende de las ventas: revisa los 30 días fijos de septiembre |
+| `parMasCercano` | No depende de las ventas: ordena el catálogo fijo de 8 productos |
 
-Para las funciones O(n), tomé el tiempo de 10.000 ventas y lo multipliqué por 100. Para los conteos de clientes también revisé la prueba de 100.000: un millón de ventas daría cerca de 0,04 segundos en `comprasPorCliente`, 0,10 en `clientesRecurrentes` y 0,07 en la versión con `Set`. Son estimaciones de una corrida, no garantías.
+Los tiempos de `comprasPorCliente` y las funciones de clientes también salen de multiplicar por 100 su resultado medido con 10.000 ventas. Las funciones de catálogo y de la serie fija de 30 días no aumentan cuando crece el arreglo de ventas.
 
 ## Comparación del reporte v0.1 y v1.0
 
