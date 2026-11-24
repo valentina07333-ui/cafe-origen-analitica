@@ -13,4 +13,10 @@ const ventas = [
   { id: 12, fecha: "2026-09-06", cliente: "C08", producto: "Origen Nariño 250 g", ciudad: "Bogotá", cantidad: 3, precio: 26000 },
 ];
 
-module.exports = { ventas };
+const ventasDiarias = [
+  320, 410, 280, 390, 510, 620, 700, 300, 290, 450,
+  480, 530, 610, 680, 350, 330, 420, 470, 560, 640,
+  710, 380, 360, 440, 500, 590, 650, 720, 400, 370,
+];
+
+module.exports = { ventas, ventasDiarias };

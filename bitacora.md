@@ -257,6 +257,8 @@ Con n productos, el tiempo es O(n) promedio (consultas e inserciones de `Map`) y
 
 Probé la versión optimizada con estos valores: 87.000 devuelve `["Origen Huila 500 g", "Origen Sierra 500 g"]`; 61.000 devuelve `["Origen Nariño 250 g", "Taza de cerámica"]`; 62.000 devuelve `null` (sin combinación).
 
+La versión por fuerza bruta devuelve las mismas parejas dentro de una lista y también devuelve `null` si no hay ninguna. Con catálogo vacío, ambas versiones devuelven `null`. `productoEstrellaPorCiudad([])` devuelve `{}` y `primerClienteUnico([])` devuelve `null`. Si dos productos empatan en una ciudad, conservo el primero que aparece en las ventas.
+
 Traza para 87.000 (el catálogo se recorre en su orden; el mapa guarda precio → producto):
 
 | Producto actual | Precio | Complemento buscado | ¿Está en Map? | Acción / resultado |
@@ -275,3 +277,52 @@ La búsqueda se detiene en la tercera fila; los productos posteriores no se reco
 | `comboRegaloOptimizado` | O(n) promedio | O(n) | Una pasada con consultas e inserciones en `Map`; puede guardar hasta n precios. |
 | `productoEstrellaPorCiudad` | O(n) promedio | O(n) | Cuenta y luego revisa las combinaciones ciudad-producto; ambas sumas de recorridos son como máximo proporcionales a n. |
 | `primerClienteUnico` | O(n) promedio | O(u), hasta O(n) | Dos pasadas y un `Map` con u clientes distintos. |
+
+## Mejor semana y presupuesto (MiniReto 11)
+
+`mejorSemanaBruta(dias, k)` vuelve a sumar cada bloque de `k` días. Tiene tiempo O(n × k), que puede llegar a O(n²), y usa memoria O(1). `mejorSemana(dias, k)` suma la primera semana y después agrega el día que entra y resta el que sale. Recorre los días una vez: tiempo O(n) y memoria O(1). Si `k` no es válido o supera la cantidad de días, ambas devuelven `null`. En un empate se conserva la primera semana.
+
+Las tres primeras ventanas de septiembre quedan así:
+
+| Inicio | Días sumados | Total (miles de pesos) |
+|---:|---|---:|
+| 1 | 1–7 | 3.230 |
+| 2 | 2–8 | 3.210 |
+| 3 | 3–9 | 3.090 |
+
+La mejor semana empieza el día 24 y suma 3.670 miles de pesos ($3.670.000). La fuerza bruta y la ventana deslizante dieron el mismo resultado. En una prueba con 100.000 días aleatorios y `k = 7`, ambas coincidieron; esa corrida tardó 2,242 ms con fuerza bruta y 1,347 ms con ventana deslizante.
+
+`parMasCercano(catalogo, presupuesto)` ordena una copia del catálogo por precio y mueve dos punteros. Si la suma supera el presupuesto, baja el puntero del precio mayor; si cabe, guarda la pareja y sube el del menor. Ordenar cuesta O(p log p) y recorrer cuesta O(p), así que el tiempo total es O(p log p); la copia ocupa O(p) de memoria. Si no hay pareja posible, devuelve `null`.
+
+Traza con presupuesto de 100.000 pesos, con precios ordenados de menor a mayor:
+
+| Izquierda | Derecha | Suma | Acción |
+|---|---|---:|---|
+| Filtros, 18.000 | Molino, 120.000 | 138.000 | Supera el presupuesto: mover derecha |
+| Filtros, 18.000 | Prensa francesa, 95.000 | 113.000 | Supera el presupuesto: mover derecha |
+| Filtros, 18.000 | Huila 1 kg, 79.000 | 97.000 | Guardar pareja; mover izquierda |
+| Nariño, 26.000 | Huila 1 kg, 79.000 | 105.000 | Supera el presupuesto: mover derecha |
+| Nariño, 26.000 | Sierra, 45.000 | 71.000 | No mejora 97.000; mover izquierda |
+| Taza, 35.000 | Sierra, 45.000 | 80.000 | No mejora 97.000; mover izquierda |
+| Huila 500 g, 42.000 | Sierra, 45.000 | 87.000 | No mejora 97.000; mover izquierda |
+
+El resultado es Filtros de papel x100 + Origen Huila 1 kg, por 97.000 pesos. Con 140.000, el par más cercano suma exactamente 140.000; con 40.000 no hay pareja.
+
+## Cierre de la semana: los 12 MiniRetos
+
+| MiniReto | Qué construí y cómo resolví el problema |
+|---:|---|
+| 1 | Guardé las 12 ventas, revisé sus campos y anoté los casos especiales. |
+| 2 | Calculé los indicadores con ciclos y revisé los resultados a mano. |
+| 3 | Reescribí cálculos con métodos de arreglos y comparé sus resultados. |
+| 4 | Armé el primer reporte y corregí los errores de ciudad y promedio vacío. |
+| 5 | Generé ventas de prueba y conté operaciones al crecer los datos. |
+| 6 | Medí la búsqueda repetida de clientes y vi que se volvía muy lenta. |
+| 7 | Comparé memoria y recorridos para elegir el cálculo de ciudad en una pasada. |
+| 8 | Documenté tiempos, memoria, proyecciones y riesgos en `RENDIMIENTO.md`. |
+| 9 | Cambié las comparaciones repetidas por conteos con `Set` y `Map`. |
+| 10 | Busqué complementos y conté productos y clientes con `Map`. |
+| 11 | Usé una ventana que se desliza y dos punteros para evitar repetir cálculos. |
+| 12 | Integré los análisis en un reporte ejecutable con datos reales o generados. |
+
+En cada reto entendí primero las entradas, las salidas y los casos límite. Luego probé una solución sencilla, medí o comparé el resultado, y elegí una forma más rápida cuando la evidencia mostró trabajo repetido.

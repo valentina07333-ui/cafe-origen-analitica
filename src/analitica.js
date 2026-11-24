@@ -53,8 +53,8 @@ function ventasPorCiudad(ventas, ciudad) {
   const ciudadBuscada = ciudad.trim().toLowerCase();
   let total = 0;
   for (const venta of ventas) {
-        if (venta.cantidad > 0 && venta.ciudad.trim().toLowerCase() === ciudadBuscada) {
-    total += valorVenta(venta);
+    if (venta.cantidad > 0 && venta.ciudad.trim().toLowerCase() === ciudadBuscada) {
+      total += valorVenta(venta);
     }
   }
   return total;
@@ -334,7 +334,7 @@ function comboRegalo(catalogo, valor) {
     }
   }
 
-  return combos;
+  return combos.length === 0 ? null : combos;
 }
 
 // Busca el primer complemento visto en una sola pasada.
@@ -353,6 +353,82 @@ function comboRegaloOptimizado(catalogo, valor) {
   }
 
   return null;
+}
+
+function mejorSemanaBruta(dias, k) {
+  if (!Number.isInteger(k) || k <= 0 || k > dias.length) {
+    return null;
+  }
+
+  let mejorTotal = -Infinity;
+  let diaInicio = 0;
+
+  for (let inicio = 0; inicio <= dias.length - k; inicio++) {
+    let total = 0;
+    for (let posicion = inicio; posicion < inicio + k; posicion++) {
+      total += dias[posicion];
+    }
+
+    if (total > mejorTotal) {
+      mejorTotal = total;
+      diaInicio = inicio + 1;
+    }
+  }
+
+  return { total: mejorTotal, diaInicio };
+}
+
+function mejorSemana(dias, k) {
+  if (!Number.isInteger(k) || k <= 0 || k > dias.length) {
+    return null;
+  }
+
+  let total = 0;
+  for (let i = 0; i < k; i++) {
+    total += dias[i];
+  }
+
+  let mejorTotal = total;
+  let diaInicio = 1;
+
+  for (let fin = k; fin < dias.length; fin++) {
+    total += dias[fin] - dias[fin - k];
+    if (total > mejorTotal) {
+      mejorTotal = total;
+      diaInicio = fin - k + 2;
+    }
+  }
+
+  return { total: mejorTotal, diaInicio };
+}
+
+function parMasCercano(catalogo, presupuesto) {
+  if (catalogo.length < 2) {
+    return null;
+  }
+
+  const ordenados = [...catalogo].sort((a, b) => a.precio - b.precio);
+  let izquierda = 0;
+  let derecha = ordenados.length - 1;
+  let mejor = null;
+
+  while (izquierda < derecha) {
+    const total = ordenados[izquierda].precio + ordenados[derecha].precio;
+
+    if (total > presupuesto) {
+      derecha--;
+    } else {
+      if (mejor === null || total > mejor.total) {
+        mejor = {
+          productos: [ordenados[izquierda].producto, ordenados[derecha].producto],
+          total,
+        };
+      }
+      izquierda++;
+    }
+  }
+
+  return mejor;
 }
 
 module.exports = {
@@ -382,6 +458,9 @@ module.exports = {
   clientesRecurrentesSet,
   comboRegalo,
   comboRegaloOptimizado,
+  mejorSemanaBruta,
+  mejorSemana,
+  parMasCercano,
 
 
 };
