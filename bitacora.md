@@ -1,6 +1,6 @@
 # Bitácora - Café Origen Analítica
 
-## Datos y casos borde
+## Diccionario de datos
 
 Cada fila es una venta de un producto a un cliente, en una ciudad y fecha.
 
@@ -14,7 +14,7 @@ Cada fila es una venta de un producto a un cliente, en una ciudad y fecha.
 | `cantidad` | Número de unidades de esa línea. |
 | `precio` | Precio unitario en pesos colombianos. |
 
-Casos y decisiones:
+## Casos borde detectados
 
 - **Ciudad con escritura distinta:** id 5 dice `medellín`; JavaScript lo separaría de `Medellín`. Normalizo al procesar en `analitica.js` (trim y mayúsculas/minúsculas coherentes); no cambio `datos.js`.
 - **Cantidad cero:** id 8 tiene cantidad 0; no es venta real y altera conteos y promedios. Excluyo cantidades 0 de todos los cálculos, pero dejo el registro en `datos.js`.
@@ -43,6 +43,15 @@ Probé cada función con los datos completos, una venta (id 1) y un arreglo vac�
 | `ventaMayor` | id 10 / id 1 / `null` |
 | `ticketPromedio` | 89.545,45 / 84.000 / 0 |
 | `ventasPorCiudad` (Medellín) | 356.000 / 84.000 / 0 |
+
+### Plan en pseudocódigo de los indicadores
+
+- **`valorVenta(venta)`:** recibir un registro; multiplicar `cantidad` por `precio`; devolver el resultado.
+- **`totalVendido(ventas)`:** iniciar total en 0; recorrer cada venta; si cantidad > 0, sumar `valorVenta`; devolver total.
+- **`unidadesVendidas(ventas)`:** iniciar unidades en 0; recorrer cada venta; si cantidad > 0, sumar cantidad; devolver unidades.
+- **`ventaMayor(ventas)`:** iniciar mayor en `null`; recorrer cada venta; si cantidad > 0 y no hay mayor o su valor supera al mayor actual, guardar el registro; devolver el registro o `null`.
+- **`ticketPromedio(ventas)`:** iniciar suma y contador en 0; recorrer cada venta; si cantidad > 0, sumar su valor y aumentar el contador; devolver 0 si el contador es 0, si no suma / contador.
+- **`ventasPorCiudad(ventas, ciudad)`:** normalizar ciudad buscada con `trim` y `toLowerCase`; iniciar total en 0; recorrer ventas; si cantidad > 0 y la ciudad normalizada coincide, sumar `valorVenta`; devolver total.
 
 ### Trazas manuales
 
@@ -99,10 +108,25 @@ Resultado manual y del programa: id 10, valor 168.000; coincide con la traza. `t
 
 ## Errores reportados por la gerente
 
-Reproduje por terminal dos fallos de una versión preliminar compartida por un compañero; la versión actual ya no los presenta.
+La versión actual no presenta estos fallos. Añadí pruebas reproducibles en `src/verificar.js` para comprobar las entradas que los provocaban.
 
-1. **Bogotá aparecía en dos grupos.** Entrada: tres ventas de valor unitario 1.000, cantidades 1, 2 y 3, con ciudades `Bogotá`, `Bogotá ` y `bogotá`. Hipótesis/causa: se usaba el texto sin normalizar como clave, igual que `medellín` del id 5. Prueba: `totalPorCiudad` devolvió una sola clave `Bogotá` con 6.000. Corrección: trim, minúsculas y primera letra mayúscula antes de agrupar.
-2. **Ticket promedio daba `NaN` en un día vacío.** El 2026-09-07 no tiene ventas (la muestra cubre del 1 al 6). Sin protección, 0/0 da `NaN`. Probé `ventasDelDia` para esa fecha: dio arreglo vacío; `ticketPromedio` devolvió 0. Corrección: si no hay ventas válidas devuelve 0 sin dividir.
+### Bogotá aparecía en dos grupos
+
+- **Síntoma:** el reporte separaba una ciudad en varias claves por diferencias de mayúsculas o espacios.
+- **Entrada que lo produce:** tres ventas de valor unitario 1.000, cantidades 1, 2 y 3, con ciudades `Bogotá`, `Bogotá ` y `bogotá`.
+- **Hipótesis:** el texto de ciudad se usa directamente como clave, sin normalización.
+- **Prueba realizada:** ejecuté `totalPorCiudad` con esas ventas; la verificación comprobó que hay una sola clave (`Bogotá`) y su total es 6.000.
+- **Causa:** los nombres se agrupaban sin quitar espacios laterales ni unificar mayúsculas y minúsculas.
+- **Corrección:** `totalPorCiudad` aplica `trim()`, `toLowerCase()` y capitaliza la primera letra antes de usar la ciudad como clave.
+
+### Ticket promedio daba `NaN` en un día vacío
+
+- **Síntoma:** el ticket promedio mostraba `NaN` cuando el filtro diario no encontraba ventas.
+- **Entrada que lo produce:** fecha `2026-09-07`, que no aparece en la muestra, filtrada con `ventasDelDia`.
+- **Hipótesis:** al no haber ventas, el cálculo divide el total entre cero.
+- **Prueba realizada:** `ventasDelDia(ventas, "2026-09-07")` devuelve `[]`; `ticketPromedio([])` devuelve `0`. `src/verificar.js` comprueba ambas condiciones.
+- **Causa:** dividir suma 0 entre contador 0 produce `NaN` en JavaScript.
+- **Corrección:** `ticketPromedio` devuelve 0 cuando no hay ventas válidas, antes de dividir. El reporte muestra ceros para ese día.
 
 ## Complejidad: predicción y medición de operaciones
 
@@ -125,6 +149,19 @@ Predicción cumplida: las tres de recorrido multiplican operaciones por 10; `pri
 | `primeraVentaConteo` | O(1), sin ciclo, siempre 2 operaciones. |
 
 Ninguna es O(n²): sin ciclos dentro de ciclos, ×10 en `n` no produce ×100 operaciones.
+
+## Preguntas sobre colecciones (MiniReto 3)
+
+| Función | ¿Qué recorro? | ¿Qué filtro? | ¿Qué transformo? | ¿Qué acumulo? | ¿Cómo agrupo? |
+|---|---|---|---|---|---|
+| `totalVendidoM` | Las ventas | Cantidad > 0 | Cada venta a su valor con `valorVenta` | Valor total | No agrupa |
+| `unidadesVendidasM` | Las ventas | Cantidad > 0 | Ningún registro | Cantidades | No agrupa |
+| `ventasPorCiudadM` | Las ventas | Cantidad > 0 y ciudad normalizada coincidente | Ciudad a minúsculas y sin espacios laterales para comparar | Valor total | No agrupa |
+| `totalPorCiudad` | Las ventas | Cantidad > 0 | Ciudad a una clave normalizada | Valor vendido | Por ciudad, en un objeto |
+| `unidadesPorProducto` | Las ventas | Cantidad > 0 | Ningún registro | Unidades | Por producto, en un objeto |
+| `topProductosPorValor` | Las ventas | Cantidad > 0 | Pares producto-total a objetos `{ producto, valor }` | Valor por producto | Agrupa por producto; ordena una copia y devuelve los primeros `k` |
+
+La muestra completa produce cuatro claves en `totalPorCiudad`: Medellín, Bogotá, Cali y Pereira. `topProductosPorValor(ventas, 3)` ordena por valor descendente y usa una copia antes de ordenar para conservar el arreglo recibido.
 
 ## Clientes recurrentes
 
@@ -180,17 +217,21 @@ Al duplicar `n`, los pares se cuadruplican; `includes` y la aleatoriedad explica
 
 El compañero observó que la proyección depende de los datos; confirmé que era aproximada y lo aclaré en el informe.
 
-Ya sustituí la búsqueda repetida por conteo con `Map`; con 100.000 ventas generadas dio cerca de 0,01 s. En mediciones actuales: `comprasPorCliente` ~0,004 s, `clientesRecurrentes` ~0,010 s y `clientesRecurrentesSet` ~0,007 s; ambas opciones de recurrentes cumplen la meta de menos de un segundo.
+Ya sustituí la búsqueda repetida por conteo con `Map`. Los siguientes tiempos son los valores que imprimió `console.timeEnd` en una corrida reciente; son específicos de esa ejecución y pueden cambiar al repetirla.
 
 Comparación adicional de tiempos:
 
-| n | Original | `Map` | `Set` |
-|---:|---:|---:|---:|
-| 1.000 | 3,6 ms | 0,3 ms | 0,2 ms |
-| 10.000 | 213 ms | 1,3 ms | 0,7 ms |
-| 100.000 | ~40 s (medición anterior) | 10 ms | 7 ms |
+| n | Original | `Map` | `Set` | `comprasPorCliente` |
+|---:|---:|---:|---:|---:|
+| 1.000 | 4,25 ms | 1,835 ms | 0,308 ms | 0,098 ms |
+| 2.000 | 12,66 ms | 0,281 ms | 0,244 ms | 0,207 ms |
+| 4.000 | 47,069 ms | 0,645 ms | 0,477 ms | 0,413 ms |
+| 8.000 | 214,237 ms | 0,801 ms | 1,103 ms | 0,422 ms |
+| 10.000 | 333,156 ms | 1,718 ms | 1,206 ms | 0,835 ms |
+| 16.000 | 852,285 ms | 3,367 ms | 1,396 ms | 0,998 ms |
+| 100.000 | No ejecutada | 15,226 ms | 12,673 ms | 8,629 ms |
 
-La original no se volvió a correr con 100.000; una prueba anterior tardó cerca de 40 s (en otra medición se registraron 40,3 s). Los tiempos varían por los datos aleatorios. A 100.000, `Map` y `Set` terminan en milisegundos, muy debajo de la meta.
+La original no se ejecutó con 100.000 ventas por su costo. Los tiempos varían por los datos aleatorios y el equipo; los decimales registran la salida de esa corrida, no una garantía de repetición. A 100.000, `Map` y `Set` terminaron en milisegundos, muy debajo de la meta.
 
 | n | Pares de la original | Trabajo `Map` | Trabajo `Set` |
 |---:|---:|---|---|

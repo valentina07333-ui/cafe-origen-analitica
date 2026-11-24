@@ -13,7 +13,7 @@ const {
 const ANCHO = 44;
 
 function pesos(valor) {
-  return "$" + Math.round(valor).toLocaleString("es-CO");
+  return "$" + valor.toLocaleString("es-CO", { maximumFractionDigits: 2 });
 }
 
 function titulo(texto) {

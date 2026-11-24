@@ -7,8 +7,12 @@ const {
   totalVendidoM,
   unidadesVendidasM,
   ventasPorCiudadM,
+  ticketPromedio,
   totalCiudadCadena,
   totalCiudadUnaPasada,
+  totalPorCiudad,
+  topProductosPorValor,
+  ventasDelDia,
   clientesRecurrentes,
   clientesRecurrentesSet,
 } = require("./analitica");
@@ -21,6 +25,48 @@ function comparar(nombre, resultadoCiclo, resultadoMetodos) {
 comparar("totalVendido", totalVendido(ventas), totalVendidoM(ventas));
 comparar("unidadesVendidas", unidadesVendidas(ventas), unidadesVendidasM(ventas));
 comparar("ventasPorCiudad (Medellín)", ventasPorCiudad(ventas, "Medellín"), ventasPorCiudadM(ventas, "Medellín"));
+
+function verificar(nombre, condicion) {
+  const estado = condicion ? "OK" : "DIFERENTE";
+  console.log(nombre + " -> " + estado);
+  if (!condicion) process.exitCode = 1;
+}
+
+const ciudades = Object.keys(totalPorCiudad(ventas)).sort();
+verificar(
+  "totalPorCiudad (cuatro ciudades)",
+  JSON.stringify(ciudades) === JSON.stringify(["Bogotá", "Cali", "Medellín", "Pereira"].sort())
+);
+
+const ordenOriginal = ventas.map((venta) => venta.id);
+const topTres = topProductosPorValor(ventas, 3);
+verificar(
+  "topProductosPorValor (tres resultados ordenados)",
+  topTres.length === 3 && topTres.every((producto, indice) =>
+    indice === 0 || topTres[indice - 1].valor >= producto.valor
+  )
+);
+verificar(
+  "topProductosPorValor (conserva el orden de ventas)",
+  JSON.stringify(ventas.map((venta) => venta.id)) === JSON.stringify(ordenOriginal)
+);
+
+const ventasBogotaVariada = [
+  { ciudad: "Bogotá", cantidad: 1, precio: 1000 },
+  { ciudad: "Bogotá ", cantidad: 2, precio: 1000 },
+  { ciudad: "bogotá", cantidad: 3, precio: 1000 },
+];
+const bogotaNormalizada = totalPorCiudad(ventasBogotaVariada);
+verificar(
+  "Bogotá con variantes de escritura (un grupo, total 6000)",
+  Object.keys(bogotaNormalizada).length === 1 && bogotaNormalizada.Bogotá === 6000
+);
+
+const ventasDiaVacio = ventasDelDia(ventas, "2026-09-07");
+verificar(
+  "Día sin ventas (ticket promedio cero)",
+  ventasDiaVacio.length === 0 && ticketPromedio(ventasDiaVacio) === 0
+);
 
 const ventasGeneradas = generarVentas(10000);
 comparar(
