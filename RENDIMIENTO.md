@@ -44,11 +44,11 @@ Para el reporte elegí `totalCiudadUnaPasada`: da el mismo resultado y no crea l
 
 ## Proyección
 
-Para las funciones lineales, multipliqué el tiempo medido con 10.000 ventas por 100. Dejo el resultado de esa operación sin redondearlo. Es una extrapolación de una corrida, no una garantía para otra máquina.
+Para estimar el tiempo con 1.000.000 de ventas, multipliqué por 100 cada tiempo medido con 10.000 ventas. Son estimaciones de una corrida.
 
 | Función | Proyección con 1.000.000 de ventas |
 |---|---:|
-| `valorVenta` | 0,038 ms por registro; recibe una venta, no el arreglo |
+| `valorVenta` | 0,038 ms por registro |
 | `totalVendido` | 293,6 ms |
 | `unidadesVendidas` | 116,6 ms |
 | `ventaMayor` | 41,6 ms |
@@ -61,22 +61,22 @@ Para las funciones lineales, multipliqué el tiempo medido con 10.000 ventas por
 | `totalCiudadCadena` | 259,2 ms |
 | `totalPorCiudad` | 230,6 ms |
 | `unidadesPorProducto` | 117,8 ms |
-| `topProductosPorValor` | 111,3 ms, si se mantienen los 5 productos medidos |
+| `topProductosPorValor` | 111,3 ms, con los mismos 5 productos |
 | `ventasDelDia` | 61,2 ms |
-| `totalVendidoConteo` | 56,3 ms; 2.000.000 operaciones |
-| `ventaMayorConteo` | 63,3 ms; 3.999.999 operaciones |
-| `totalPorCiudadConteo` | 156,9 ms; 3.000.000 operaciones |
-| `primeraVentaConteo` | 0,019 ms; 2 operaciones |
+| `totalVendidoConteo` | 56,3 ms |
+| `ventaMayorConteo` | 63,3 ms |
+| `totalPorCiudadConteo` | 156,9 ms |
+| `primeraVentaConteo` | 0,019 ms |
 | `comprasPorCliente` | 55,7 ms |
 | `clientesRecurrentes` | 127,3 ms |
 | `clientesRecurrentesSet` | 69,7 ms |
 | `productoEstrellaPorCiudad` | 331,4 ms |
 | `primerClienteUnico` | 118,4 ms |
-| `comboRegaloOptimizado` | No depende de las ventas: recorre el catálogo fijo de 8 productos |
-| `mejorSemana` | No depende de las ventas: revisa los 30 días fijos de septiembre |
-| `parMasCercano` | No depende de las ventas: ordena el catálogo fijo de 8 productos |
+| `comboRegaloOptimizado` | No depende de la cantidad de ventas |
+| `mejorSemana` | No depende de la cantidad de ventas |
+| `parMasCercano` | No depende de la cantidad de ventas |
 
-Los tiempos de `comprasPorCliente` y las funciones de clientes también salen de multiplicar por 100 su resultado medido con 10.000 ventas. Las funciones de catálogo y de la serie fija de 30 días no aumentan cuando crece el arreglo de ventas.
+Las funciones de catálogo y de días fijos no aumentan cuando crece la cantidad de ventas.
 
 ## Comparación del reporte v0.1 y v1.0
 
