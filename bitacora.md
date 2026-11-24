@@ -217,6 +217,8 @@ Al duplicar `n`, los pares se cuadruplican; `includes` y la aleatoriedad explica
 
 El compañero observó que la proyección depende de los datos; confirmé que era aproximada y lo aclaré en el informe.
 
+**Conclusión para la gerente:** el reporte se demora porque compara muchas ventas entre sí y vuelve a buscar clientes repetidos. Cuando hay más ventas, repite ese trabajo muchas más veces. La versión optimizada recuerda los clientes que ya vio y evita repetir las búsquedas.
+
 Ya sustituí la búsqueda repetida por conteo con `Map`. Los siguientes tiempos son los valores que imprimió `console.timeEnd` en una corrida reciente; son específicos de esa ejecución y pueden cambiar al repetirla.
 
 Comparación adicional de tiempos:
