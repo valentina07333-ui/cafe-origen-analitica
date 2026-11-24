@@ -29,16 +29,7 @@ Los tiempos son de una sola corrida con ventas generadas, así que pueden variar
 | `clientesRecurrentes` | Devuelve los clientes con más de una compra. | O(n) promedio | O(u) | Toma del `Map` los clientes que aparecen más de una vez. | 1,273 ms |
 | `clientesRecurrentesSet` | Hace lo mismo con dos `Set`. | O(n) promedio | O(u) | Uno recuerda quién apareció; el otro, quién se repitió. | 0,697 ms |
 
-Los conteos no incluyen cada instrucción de JavaScript; son las visitas y comparaciones que decidí contar en `medir.js`. `u` representa los clientes distintos, `p` los productos distintos y `m` las combinaciones encontradas. Los tiempos son de una sola corrida y pueden variar, sobre todo en funciones que crean arreglos.
-
-El motor también tiene estas funciones, añadidas después de las primeras mediciones:
-
-| Función | Para qué sirve | Tiempo | Memoria extra | Cómo lo veo | Medición |
-|---|---|---|---|---|---:|
-| `productoEstrellaPorCiudad` | Encuentra el producto más vendido en cada ciudad. | O(n) promedio | O(n) | Cuenta ventas por ciudad y producto con dos `Map`. | 3,314 ms con 10.000 ventas |
-| `primerClienteUnico` | Encuentra el primer cliente que compró una sola vez. | O(n) promedio | O(u) | Cuenta clientes y luego busca el primero con una compra. | 1,184 ms con 10.000 ventas |
-| `comboRegalo` | Encuentra parejas de productos que suman el valor de una tarjeta. | O(p²) | O(m), más O(1) auxiliar | Prueba cada pareja del catálogo. | No aplica: recibe un catálogo, no ventas |
-| `comboRegaloOptimizado` | Encuentra una pareja con una búsqueda en `Map`. | O(p) promedio | O(p) | Guarda precios vistos y busca el complemento. | No aplica: recibe un catálogo, no ventas |
+Los conteos no incluyen cada instrucción de JavaScript; son las visitas y comparaciones que decidí contar en `medir.js`. `u` representa los clientes distintos y `p` los productos distintos. Los tiempos son de una sola corrida y pueden variar, sobre todo en funciones que crean arreglos.
 
 `totalCiudadCadena` usa cuatro métodos: `map` y `filter` recorren todas las ventas; el segundo `map` y `reduce` recorren las que pasaron el filtro. Se puede contar como O(4n), pero Big O deja fuera el número 4 porque no cambia cómo crece el trabajo: O(4n) = O(n).
 
@@ -72,8 +63,6 @@ No tiene mucho sentido dar tantos decimales para una estimación. La mayoría de
 | `comprasPorCliente` | Menos de una décima de segundo |
 | `clientesRecurrentes` | Alrededor de una décima de segundo, según la medición de 100.000 ventas |
 | `clientesRecurrentesSet` | Menos de una décima de segundo, según la medición de 100.000 ventas |
-| `productoEstrellaPorCiudad` | Cerca de 0,33 segundos, estimado al multiplicar por 100 su tiempo con 10.000 ventas |
-| `primerClienteUnico` | Cerca de 0,12 segundos, estimado al multiplicar por 100 su tiempo con 10.000 ventas |
 
 Para las funciones O(n), tomé el tiempo de 10.000 ventas y lo multipliqué por 100. Para los conteos de clientes también revisé la prueba de 100.000: un millón de ventas daría cerca de 0,04 segundos en `comprasPorCliente`, 0,10 en `clientesRecurrentes` y 0,07 en la versión con `Set`. Son estimaciones de una corrida, no garantías.
 
