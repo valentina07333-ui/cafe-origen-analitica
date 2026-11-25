@@ -24,3 +24,18 @@ Las ventas con cantidad 0 se excluyen y las variantes de escritura de una ciudad
 - `src/datos.js`, `src/catalogo.js`, `src/generador.js`: ventas de ejemplo, catálogo y datos aleatorios.
 - `src/pruebas.js`, `src/verificar.js`, `src/medir.js`: pruebas, comparación y mediciones.
 - `bitacora.md`: decisiones y trazas; `RENDIMIENTO.md`: complejidad y tiempos.
+
+## Requisitos
+
+- Node.js
+- Terminal
+- No necesita instalar paquetes externos
+
+## Desde cero
+
+```bash
+git clone <url-del-repositorio>
+cd cafe-origen-analitica
+node src/reporte.js
+node src/reporte.js 100000
+```

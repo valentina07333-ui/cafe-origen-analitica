@@ -152,3 +152,29 @@ El par queda $3.000 por debajo del presupuesto.
 - **Mejor semana:** pasé de volver a sumar cada bloque a una ventana deslizante.
 - **Presupuesto:** ordené precios y moví dos índices desde los extremos.
 - **Reporte:** junté los análisis en un comando que acepta datos fijos o n ventas generadas. La comparación de v0.1 y v1.0 está en `RENDIMIENTO.md`; el reporte actual tarda algo más porque muestra más información.
+
+## Método para resolver retos
+
+Para optimizar clientes repetidos seguí estos pasos:
+
+1. **Entender:** necesitaba devolver los clientes que aparecen en más de una venta válida.
+2. **Ejemplos:** probé un arreglo vacío, C01 una sola vez, C01 varias veces y C01 con cantidad cero.
+3. **Fuerza bruta:** comparé cada venta con las que venían después y usé `includes`. En el peor caso llegó a O(n²) o más.
+4. **Optimizar:** decidí guardar cada cliente una sola vez mientras recorría las ventas.
+5. **Implementar:** hice una versión con `Map` y otra con dos `Set`.
+6. **Probar:** comparé las tres versiones con los datos del Día 1 y con 5.000 ventas generadas. Las listas podían tener otro orden, así que las ordené antes de compararlas.
+
+## Cierre de los 12 MiniRetos
+
+1. Representé las ventas y exploré sus casos especiales.
+2. Hice los indicadores básicos con ciclos.
+3. Reescribí cálculos con métodos y agregué agrupaciones.
+4. Armé el primer reporte y corregí los errores.
+5. Creé ventas aleatorias y medí operaciones.
+6. Encontré que clientes recurrentes podía tardar mucho.
+7. Comparé tiempo y memoria de varios recorridos.
+8. Preparé el informe de rendimiento.
+9. Cambié clientes recurrentes a `Map` y `Set`.
+10. Agregué catálogo, combos y frecuencias.
+11. Usé ventana deslizante y dos punteros.
+12. Integré todo en el reporte v1.0 y revisé su resultado.

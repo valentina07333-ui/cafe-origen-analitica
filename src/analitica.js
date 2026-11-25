@@ -3,437 +3,445 @@ function valorVenta(venta) {
 }
 
 function totalVendido(ventas) {
-  let total = 0;
-  for (const venta of ventas) {
+  let suma = 0;
+  for (let venta of ventas) {
     if (venta.cantidad > 0) {
-      total += valorVenta(venta);
+      suma = suma + valorVenta(venta);
     }
   }
-  return total;
+  return suma;
 }
 
 function unidadesVendidas(ventas) {
-  let unidades = 0;
-  for (const venta of ventas) {
+  let suma = 0;
+  for (let venta of ventas) {
     if (venta.cantidad > 0) {
-      unidades += venta.cantidad;
+      suma = suma + venta.cantidad;
     }
   }
-  return unidades;
+  return suma;
 }
 
 function ventaMayor(ventas) {
-  let mayor = null;
-  for (const venta of ventas) {
+  let mejor = null;
+  for (let venta of ventas) {
     if (venta.cantidad > 0) {
-      if (mayor === null || valorVenta(venta) > valorVenta(mayor)) {
-        mayor = venta;
+      if (mejor == null) {
+        mejor = venta;
+      } else if (valorVenta(venta) > valorVenta(mejor)) {
+        mejor = venta;
       }
     }
   }
-  return mayor;
+  return mejor;
 }
 
 function ticketPromedio(ventas) {
   let suma = 0;
-  let cantidadVentas = 0;
-  for (const venta of ventas) {
+  let cantidad = 0;
+  for (let venta of ventas) {
     if (venta.cantidad > 0) {
-      suma += valorVenta(venta);
-      cantidadVentas += 1;
+      suma = suma + valorVenta(venta);
+      cantidad = cantidad + 1;
     }
   }
-  if (cantidadVentas === 0) {
+  if (cantidad == 0) {
     return 0;
   }
-  return suma / cantidadVentas;
+  return suma / cantidad;
 }
 
 function ventasPorCiudad(ventas, ciudad) {
-  const ciudadBuscada = ciudad.trim().toLowerCase();
-  let total = 0;
-  for (const venta of ventas) {
-        if (venta.cantidad > 0 && venta.ciudad.trim().toLowerCase() === ciudadBuscada) {
-    total += valorVenta(venta);
+  let buscada = ciudad.trim().toLowerCase();
+  let suma = 0;
+  for (let venta of ventas) {
+    if (venta.cantidad > 0) {
+      if (venta.ciudad.trim().toLowerCase() == buscada) {
+        suma = suma + valorVenta(venta);
+      }
     }
   }
-  return total;
+  return suma;
 }
+
 function totalVendidoM(ventas) {
-  return ventas
-    .filter((venta) => venta.cantidad > 0)
-    .reduce((total, venta) => total + valorVenta(venta), 0);
+  let validas = ventas.filter(function (venta) {
+    return venta.cantidad > 0;
+  });
+
+  let total = validas.reduce(function (suma, venta) {
+    return suma + valorVenta(venta);
+  }, 0);
+
+  return total;
 }
 
 function unidadesVendidasM(ventas) {
-  return ventas
-    .filter((venta) => venta.cantidad > 0)
-    .reduce((unidades, venta) => unidades + venta.cantidad, 0);
-}
+  let validas = ventas.filter(function (venta) {
+    return venta.cantidad > 0;
+  });
 
-function ventasPorCiudadM(ventas, ciudad) {
-  const ciudadBuscada = ciudad.trim().toLowerCase();
-  return ventas
-    .filter((venta) => venta.cantidad > 0 && venta.ciudad.trim().toLowerCase() === ciudadBuscada)
-    .reduce((total, venta) => total + valorVenta(venta), 0);
-}
-
-function totalCiudadUnaPasada(ventas, ciudad) {
-  const ciudadBuscada = ciudad.trim().toLowerCase();
-  let total = 0;
-
-  for (const venta of ventas) {
-    const ciudadVenta = venta.ciudad.trim().toLowerCase();
-    if (venta.cantidad > 0 && ciudadVenta === ciudadBuscada) {
-      total += valorVenta(venta);
-    }
-  }
+  let total = validas.reduce(function (suma, venta) {
+    return suma + venta.cantidad;
+  }, 0);
 
   return total;
 }
 
-function totalCiudadCadena(ventas, ciudad) {
-  const ciudadBuscada = ciudad.trim().toLowerCase();
+function ventasPorCiudadM(ventas, ciudad) {
+  let buscada = ciudad.trim().toLowerCase();
+  let validas = ventas.filter(function (venta) {
+    return venta.cantidad > 0 && venta.ciudad.trim().toLowerCase() == buscada;
+  });
 
-  return ventas
-    .map((venta) => ({
-      ...venta,
-      ciudad: venta.ciudad.trim().toLowerCase(),
-    }))
-    .filter((venta) => venta.cantidad > 0 && venta.ciudad === ciudadBuscada)
-    .map((venta) => valorVenta(venta))
-    .reduce((total, valor) => total + valor, 0);
+  let total = validas.reduce(function (suma, venta) {
+    return suma + valorVenta(venta);
+  }, 0);
+
+  return total;
+}
+
+function totalCiudadUnaPasada(ventas, ciudad) {
+  let buscada = ciudad.trim().toLowerCase();
+  let suma = 0;
+  for (let i = 0; i < ventas.length; i++) {
+    if (ventas[i].cantidad > 0 && ventas[i].ciudad.trim().toLowerCase() == buscada) {
+      suma = suma + valorVenta(ventas[i]);
+    }
+  }
+  return suma;
+}
+
+function totalCiudadCadena(ventas, ciudad) {
+  let buscada = ciudad.trim().toLowerCase();
+  let suma = ventas
+    .map(function (venta) {
+      return { ...venta, ciudad: venta.ciudad.trim().toLowerCase() };
+    })
+    .filter(function (venta) {
+      return venta.cantidad > 0 && venta.ciudad == buscada;
+    })
+    .map(function (venta) {
+      return valorVenta(venta);
+    });
+
+  let total = 0;
+  for (let i = 0; i < suma.length; i++) total = total + suma[i];
+  return total;
 }
 
 function totalPorCiudad(ventas) {
-  const totales = {};
-  for (const venta of ventas) {
+  let resultado = {};
+  for (let venta of ventas) {
     if (venta.cantidad > 0) {
-      const ciudad = venta.ciudad.trim().toLowerCase();
-      const nombre = ciudad.charAt(0).toUpperCase() + ciudad.slice(1);
-      if (totales[nombre] === undefined) {
-        totales[nombre] = 0;
-      }
-      totales[nombre] += valorVenta(venta);
+      let texto = venta.ciudad.trim().toLowerCase();
+      let ciudad = texto.charAt(0).toUpperCase() + texto.slice(1);
+      if (resultado[ciudad] == null) resultado[ciudad] = 0;
+      resultado[ciudad] = resultado[ciudad] + valorVenta(venta);
     }
   }
-  return totales;
+  return resultado;
 }
 
 function productoEstrellaPorCiudad(ventas) {
-  const conteosPorCiudad = new Map();
+  let ciudades = new Map();
 
-  for (const venta of ventas) {
-    if (venta.cantidad <= 0) continue;
+  for (let venta of ventas) {
+    if (venta.cantidad > 0) {
+      let texto = venta.ciudad.trim().toLowerCase();
+      let ciudad = texto[0].toUpperCase() + texto.slice(1);
 
-    const ciudadTexto = venta.ciudad.trim().toLowerCase();
-    const ciudad = ciudadTexto.charAt(0).toUpperCase() + ciudadTexto.slice(1);
+      let productos = new Map();
+      if (ciudades.has(ciudad)) {
+        productos = ciudades.get(ciudad);
+      }
 
-    if (!conteosPorCiudad.has(ciudad)) {
-      conteosPorCiudad.set(ciudad, new Map());
+      let cantidad = 0;
+      if (productos.has(venta.producto)) {
+        cantidad = productos.get(venta.producto);
+      }
+      productos.set(venta.producto, cantidad + 1);
+      ciudades.set(ciudad, productos);
     }
-
-    const conteosProductos = conteosPorCiudad.get(ciudad);
-    conteosProductos.set(
-      venta.producto,
-      (conteosProductos.get(venta.producto) || 0) + 1,
-    );
   }
 
-  const estrellas = {};
-  for (const [ciudad, conteosProductos] of conteosPorCiudad) {
-    let productoEstrella = null;
-    let maximo = 0;
+  let respuesta = {};
+  let nombresCiudades = ciudades.keys();
+  for (let ciudad of nombresCiudades) {
+    let productos = ciudades.get(ciudad);
+    let nombresProductos = productos.keys();
+    let estrella = null;
+    let mayor = 0;
 
-    for (const [producto, frecuencia] of conteosProductos) {
-      // En empate conserva el primero visto en esa ciudad.
-      if (frecuencia > maximo) {
-        productoEstrella = producto;
-        maximo = frecuencia;
+    for (let producto of nombresProductos) {
+      let veces = productos.get(producto);
+      if (estrella == null || veces > mayor) {
+        estrella = producto;
+        mayor = veces;
       }
     }
-
-    estrellas[ciudad] = productoEstrella;
+    respuesta[ciudad] = estrella;
   }
-
-  return estrellas;
+  return respuesta;
 }
 
 function primerClienteUnico(ventas) {
-  const comprasPorCliente = new Map();
-
-  for (const venta of ventas) {
-    if (venta.cantidad <= 0) continue;
-    comprasPorCliente.set(
-      venta.cliente,
-      (comprasPorCliente.get(venta.cliente) || 0) + 1,
-    );
-  }
-
-  for (const venta of ventas) {
-    if (venta.cantidad > 0 && comprasPorCliente.get(venta.cliente) === 1) {
-      return venta.cliente;
+  let compras = new Map();
+  for (let venta of ventas) {
+    if (venta.cantidad > 0) {
+      let cliente = venta.cliente;
+      let cantidad = 0;
+      if (compras.has(cliente)) {
+        cantidad = compras.get(cliente);
+      }
+      compras.set(cliente, cantidad + 1);
     }
   }
 
+  for (let venta of ventas) {
+    if (venta.cantidad > 0) {
+      if (compras.get(venta.cliente) == 1) {
+        return venta.cliente;
+      }
+    }
+  }
   return null;
 }
 
 function unidadesPorProducto(ventas) {
-  const unidades = {};
-  for (const venta of ventas) {
+  let resultado = {};
+  for (let venta of ventas) {
     if (venta.cantidad > 0) {
-      if (unidades[venta.producto] === undefined) {
-        unidades[venta.producto] = 0;
-      }
-      unidades[venta.producto] += venta.cantidad;
+      let producto = venta.producto;
+      if (resultado[producto] == null) resultado[producto] = 0;
+      resultado[producto] = resultado[producto] + venta.cantidad;
     }
   }
-  return unidades;
+  return resultado;
 }
 
 function topProductosPorValor(ventas, k) {
-  const valores = {};
-  for (const venta of ventas) {
+  let valores = {};
+  for (let venta of ventas) {
     if (venta.cantidad > 0) {
-      if (valores[venta.producto] === undefined) {
-        valores[venta.producto] = 0;
-      }
-      valores[venta.producto] += valorVenta(venta);
+      let producto = venta.producto;
+      if (valores[producto] == null) valores[producto] = 0;
+      valores[producto] = valores[producto] + valorVenta(venta);
     }
   }
 
-  const lista = Object.entries(valores).map(([producto, valor]) => ({ producto, valor }));
-  return [...lista].sort((a, b) => b.valor - a.valor).slice(0, k);
+  let arreglo = [];
+  let nombres = Object.keys(valores);
+  for (let i = 0; i < nombres.length; i++) {
+    arreglo.push({ producto: nombres[i], valor: valores[nombres[i]] });
+  }
+
+  arreglo.sort(function (a, b) {
+    return b.valor - a.valor;
+  });
+
+  let resultado = arreglo.slice(0, k);
+  return resultado;
 }
+
 function ventasDelDia(ventas, fecha) {
-  const dia = fecha.trim();
-  const delDia = [];
-  for (const venta of ventas) {
-    if (venta.cantidad > 0 && venta.fecha === dia) {
-      delDia.push(venta);
+  let resultado = [];
+  for (let venta of ventas) {
+    if (venta.cantidad > 0 && venta.fecha == fecha.trim()) {
+      resultado.push(venta);
     }
   }
-  return delDia;
+  return resultado;
 }
+
 function totalVendidoConteo(ventas, contador) {
-  let total = 0;
-  for (const venta of ventas) {
-    contador.operaciones += 1; // visita
-    contador.operaciones += 1; // comparación: cantidad > 0
-    if (venta.cantidad > 0) {
-      total += valorVenta(venta);
-    }
+  let suma = 0;
+  for (let venta of ventas) {
+    contador.operaciones = contador.operaciones + 1;
+    contador.operaciones = contador.operaciones + 1;
+    if (venta.cantidad > 0) suma = suma + valorVenta(venta);
   }
-  return total;
+  return suma;
 }
 
 function ventaMayorConteo(ventas, contador) {
-  let mayor = null;
-  for (const venta of ventas) {
-    contador.operaciones += 1; // visita
-    contador.operaciones += 1; // comparación: cantidad > 0
+  let mejor = null;
+  for (let venta of ventas) {
+    contador.operaciones = contador.operaciones + 1;
+    contador.operaciones = contador.operaciones + 1;
     if (venta.cantidad > 0) {
-      contador.operaciones += 1; // comparación: mayor === null
-      if (mayor === null) {
-        mayor = venta;
+      contador.operaciones = contador.operaciones + 1;
+      if (mejor == null) {
+        mejor = venta;
       } else {
-        contador.operaciones += 1; // comparación: valor contra el mayor
-        if (valorVenta(venta) > valorVenta(mayor)) {
-          mayor = venta;
-        }
+        contador.operaciones = contador.operaciones + 1;
+        if (valorVenta(venta) > valorVenta(mejor)) mejor = venta;
       }
     }
   }
-  return mayor;
+  return mejor;
 }
 
 function totalPorCiudadConteo(ventas, contador) {
-  const totales = {};
-  for (const venta of ventas) {
-    contador.operaciones += 1; // visita
-    contador.operaciones += 1; // comparación: cantidad > 0
+  let resultado = {};
+  for (let venta of ventas) {
+    contador.operaciones = contador.operaciones + 1;
+    contador.operaciones = contador.operaciones + 1;
     if (venta.cantidad > 0) {
-      const ciudad = venta.ciudad.trim().toLowerCase();
-      const nombre = ciudad.charAt(0).toUpperCase() + ciudad.slice(1);
-      contador.operaciones += 1; // comparación: ciudad nueva
-      if (totales[nombre] === undefined) {
-        totales[nombre] = 0;
-      }
-      totales[nombre] += valorVenta(venta);
+      let texto = venta.ciudad.trim().toLowerCase();
+      let ciudad = texto.charAt(0).toUpperCase() + texto.slice(1);
+      contador.operaciones = contador.operaciones + 1;
+      if (resultado[ciudad] == null) resultado[ciudad] = 0;
+      resultado[ciudad] = resultado[ciudad] + valorVenta(venta);
     }
   }
-  return totales;
+  return resultado;
 }
 
 function primeraVentaConteo(ventas, contador) {
-  contador.operaciones += 1; // comparación: hay ventas
-  if (ventas.length === 0) {
-    return null;
-  }
-  contador.operaciones += 1; // visita: la primera venta
+  contador.operaciones = contador.operaciones + 1;
+  if (ventas.length == 0) return null;
+  contador.operaciones = contador.operaciones + 1;
   return ventas[0];
 }
 
 function comprasPorCliente(ventas) {
-  const conteos = new Map();
-
-  for (const venta of ventas) {
-    if (venta.cantidad <= 0) continue;
-
-    const cliente = venta.cliente;
-    const cantidad = conteos.has(cliente) ? conteos.get(cliente) : 0;
-    conteos.set(cliente, cantidad + 1);
+  let resultado = new Map();
+  for (let venta of ventas) {
+    if (venta.cantidad > 0) {
+      let cliente = venta.cliente;
+      let numero = 0;
+      if (resultado.has(cliente)) {
+        numero = resultado.get(cliente);
+      }
+      resultado.set(cliente, numero + 1);
+    }
   }
-
-  return conteos;
+  return resultado;
 }
 
 function clientesRecurrentes(ventas) {
-  const recurrentes = [];
-  for (const [cliente, compras] of comprasPorCliente(ventas)) {
-    if (compras > 1) {
-      recurrentes.push(cliente);
-    }
+  let resultado = [];
+  let compras = comprasPorCliente(ventas);
+  let nombres = compras.keys();
+  for (let cliente of nombres) {
+    if (compras.get(cliente) > 1) resultado.push(cliente);
   }
-
-  return recurrentes;
+  return resultado;
 }
 
 function clientesRecurrentesSet(ventas) {
-  const vistos = new Set();
-  const recurrentes = new Set();
+  let vistos = new Set();
+  let repetidos = new Set();
 
-  for (const venta of ventas) {
-    if (venta.cantidad <= 0) continue;
-
-    const cliente = venta.cliente;
-    if (vistos.has(cliente)) {
-      recurrentes.add(cliente);
-    } else {
+  for (let venta of ventas) {
+    if (venta.cantidad > 0) {
+      let cliente = venta.cliente;
+      if (vistos.has(cliente)) repetidos.add(cliente);
       vistos.add(cliente);
     }
   }
 
-  if (recurrentes.size === 0) {
-    return [];
+  let resultado = [];
+  let nombres = vistos.values();
+  for (let cliente of nombres) {
+    if (repetidos.has(cliente)) resultado.push(cliente);
   }
-
-  return [...vistos].filter((cliente) => recurrentes.has(cliente));
+  return resultado;
 }
 
-// Referencia por fuerza bruta: prueba cada par distinto.
-// Tiempo O(n²); espacio O(1) auxiliar, más O(m) por los m resultados.
 function comboRegaloFuerzaBruta(catalogo, valor) {
-  const combos = [];
-
+  let resultado = [];
   for (let i = 0; i < catalogo.length; i++) {
     for (let j = i + 1; j < catalogo.length; j++) {
-      if (catalogo[i].precio + catalogo[j].precio === valor) {
-        combos.push([catalogo[i].producto, catalogo[j].producto]);
+      if (catalogo[i].precio + catalogo[j].precio == valor) {
+        resultado.push([catalogo[i].producto, catalogo[j].producto]);
       }
     }
   }
-
-  return combos;
+  return resultado;
 }
 
-// Busca un complemento en una sola pasada.
-// Tiempo O(n) promedio y espacio O(n) para los precios guardados.
 function comboRegalo(catalogo, valor) {
-  const productosPorPrecio = new Map();
-
-  for (const item of catalogo) {
-    const complemento = valor - item.precio;
-
-    if (productosPorPrecio.has(complemento)) {
-      return [productosPorPrecio.get(complemento), item.producto];
+  let guardados = new Map();
+  for (let i = 0; i < catalogo.length; i++) {
+    let faltante = valor - catalogo[i].precio;
+    if (guardados.has(faltante)) {
+      let anterior = guardados.get(faltante);
+      if (anterior.indice != i) {
+        return [anterior.producto, catalogo[i].producto];
+      }
     }
-
-    productosPorPrecio.set(item.precio, item.producto);
+    let actual = {};
+    actual.indice = i;
+    actual.producto = catalogo[i].producto;
+    guardados.set(catalogo[i].precio, actual);
   }
-
   return null;
 }
 
-// Alias explícito para comparar con la versión de fuerza bruta.
 function comboRegaloOptimizado(catalogo, valor) {
   return comboRegalo(catalogo, valor);
 }
 
-// Fuerza bruta: suma desde cero cada bloque consecutivo de k días.
-// Tiempo O((n-k+1)k), es decir O(nk); espacio auxiliar O(1).
 function mejorSemanaBruta(dias, k) {
-  if (!Number.isInteger(k) || k <= 0 || k > dias.length) {
-    return null;
+  if (!Number.isInteger(k) || k <= 0 || k > dias.length) return null;
+  let mejor = -Infinity;
+  for (let i = 0; i <= dias.length - k; i++) {
+    let suma = 0;
+    for (let j = i; j < i + k; j++) suma = suma + dias[j];
+    if (suma > mejor) mejor = suma;
   }
-
-  let mejorTotal = -Infinity;
-  for (let inicio = 0; inicio <= dias.length - k; inicio++) {
-    let total = 0;
-    for (let desplazamiento = 0; desplazamiento < k; desplazamiento++) {
-      total += dias[inicio + desplazamiento];
-    }
-    if (total > mejorTotal) {
-      mejorTotal = total;
-    }
-  }
-
-  return mejorTotal;
+  return mejor;
 }
 
-// Ventana deslizante: reutiliza la suma anterior al moverla un día.
-// Tiempo O(n) y espacio auxiliar O(1).
 function mejorSemana(dias, k) {
   if (!Number.isInteger(k) || k <= 0 || k > dias.length) {
     return null;
   }
-
-  let totalVentana = 0;
+  let suma = 0;
   for (let i = 0; i < k; i++) {
-    totalVentana += dias[i];
+    suma = suma + dias[i];
   }
 
-  let mejorTotal = totalVentana;
-  let mejorInicio = 0;
-
-  for (let entra = k; entra < dias.length; entra++) {
-    totalVentana += dias[entra] - dias[entra - k];
-    if (totalVentana > mejorTotal) {
-      mejorTotal = totalVentana;
-      mejorInicio = entra - k + 1;
+  let mejor = suma;
+  let inicio = 0;
+  for (let i = k; i < dias.length; i++) {
+    suma = suma - dias[i - k] + dias[i];
+    if (suma > mejor) {
+      mejor = suma;
+      inicio = i - k + 1;
     }
   }
-
-  return { total: mejorTotal, diaInicio: mejorInicio + 1 };
+  return { total: mejor, diaInicio: inicio + 1 };
 }
 
-// Ordena copia O(n log n); dos punteros O(n); espacio O(n) por la copia.
 function parMasCercano(precios, presupuesto) {
   if (!Array.isArray(precios) || precios.length < 2) {
     return null;
   }
+  let copia = precios.slice();
+  copia.sort(function (a, b) {
+    return a.precio - b.precio;
+  });
 
-  const ordenados = [...precios].sort((a, b) => a.precio - b.precio);
   let izquierda = 0;
-  let derecha = ordenados.length - 1;
+  let derecha = copia.length - 1;
   let mejorSuma = -Infinity;
   let mejorPar = null;
 
   while (izquierda < derecha) {
-    const suma = ordenados[izquierda].precio + ordenados[derecha].precio;
-
+    let suma = copia[izquierda].precio + copia[derecha].precio;
     if (suma <= presupuesto) {
       if (suma > mejorSuma) {
         mejorSuma = suma;
-        mejorPar = [ordenados[izquierda].producto, ordenados[derecha].producto];
+        mejorPar = [copia[izquierda].producto, copia[derecha].producto];
       }
-      izquierda++;
+      izquierda = izquierda + 1;
     } else {
-      derecha--;
+      derecha = derecha - 1;
     }
   }
-
   return mejorPar;
 }
 
@@ -468,6 +476,4 @@ module.exports = {
   mejorSemanaBruta,
   mejorSemana,
   parMasCercano,
-
-
 };

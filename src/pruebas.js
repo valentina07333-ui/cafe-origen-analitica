@@ -1,15 +1,16 @@
-const { ventas } = require("./datos");
-const {
-  valorVenta,
-  totalVendido,
-  unidadesVendidas,
-  ventaMayor,
-  ticketPromedio,
-  ventasPorCiudad,
-} = require("./analitica");
+let datos = require("./datos");
+let analitica = require("./analitica");
 
-const unaVenta = [ventas[0]];
-const vacio = [];
+let ventas = datos.ventas;
+let valorVenta = analitica.valorVenta;
+let totalVendido = analitica.totalVendido;
+let unidadesVendidas = analitica.unidadesVendidas;
+let ventaMayor = analitica.ventaMayor;
+let ticketPromedio = analitica.ticketPromedio;
+let ventasPorCiudad = analitica.ventasPorCiudad;
+
+let unaVenta = [ventas[0]];
+let vacio = [];
 
 console.log("valorVenta (recibe un registro, no un arreglo)");
 console.log(valorVenta(ventas[0]));
