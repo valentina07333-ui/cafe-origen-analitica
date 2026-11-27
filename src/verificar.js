@@ -61,6 +61,7 @@ function compararClientesRecurrentes(nombre, arreglo) {
   resultados.push(JSON.stringify(resultado1));
   resultados.push(JSON.stringify(resultado2));
   resultados.push(JSON.stringify(resultado3));
+
   let estado = "OK";
   for (let i = 0; i < resultados.length; i++) {
     if (resultados[i] != resultados[0]) {

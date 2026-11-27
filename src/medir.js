@@ -30,17 +30,13 @@ for (let i = 0; i < tamanos.length; i++) {
   let n = tamanos[i];
   let ventas = generarVentas(n);
 
-  let contadorTotal = {};
-  contadorTotal.operaciones = 0;
+  let contadorTotal = { operaciones: 0};
 
-  let contadorMayor = {};
-  contadorMayor.operaciones = 0;
+  let contadorMayor = {operaciones: 0};
 
-  let contadorCiudad = {};
-  contadorCiudad.operaciones = 0;
+  let contadorCiudad = {operaciones: 0};
 
-  let contadorPrimera = {};
-  contadorPrimera.operaciones = 0;
+  let contadorPrimera = {operaciones: 0};
 
   totalVendidoConteo(ventas, contadorTotal);
   ventaMayorConteo(ventas, contadorMayor);

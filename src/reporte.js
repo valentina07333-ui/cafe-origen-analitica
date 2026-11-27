@@ -30,67 +30,68 @@ function pesos(valor) {
   return "$" + valor.toLocaleString("es-CO");
 }
 
-function titulo(texto) {
-  console.log("");
-  console.log(texto);
-  console.log("-".repeat(ancho));
-}
-
-function linea(nombre, valor) {
-  let espacios = Math.max(ancho - valor.length, nombre.length + 2);
-  console.log(nombre.padEnd(espacios) + valor);
-}
-
 console.log("=".repeat(ancho));
 console.log("CAFÉ ORIGEN - REPORTE DE VENTAS");
 console.log(queDato);
 console.log("=".repeat(ancho));
 
-titulo("RESUMEN GENERAL");
+console.log("");
+console.log("RESUMEN GENERAL");
+console.log("-".repeat(ancho));
 let mayor = analitica.ventaMayor(ventas);
 let totalGeneral = analitica.totalVendido(ventas);
-linea("Total vendido", pesos(totalGeneral));
-linea("Unidades vendidas", String(analitica.unidadesVendidas(ventas)));
-linea("Venta más grande (id " + mayor.id + ")", pesos(mayor.cantidad * mayor.precio));
-linea("Ticket promedio", pesos(analitica.ticketPromedio(ventas)));
+console.log("Total vendido:", pesos(totalGeneral));
+console.log("Unidades vendidas:", analitica.unidadesVendidas(ventas));
+console.log("Venta más grande (id " + mayor.id + "):", pesos(mayor.cantidad * mayor.precio));
+console.log("Ticket promedio:", pesos(analitica.ticketPromedio(ventas)));
 
-titulo("VENTAS POR CIUDAD");
+console.log("");
+console.log("VENTAS POR CIUDAD");
+console.log("-".repeat(ancho));
 let porCiudad = analitica.totalPorCiudad(ventas);
 let ciudades = Object.keys(porCiudad);
 for (let i = 0; i < ciudades.length; i++) {
   let ciudad = ciudades[i];
-  linea(ciudad, pesos(porCiudad[ciudad]));
+  console.log(ciudad + ":", pesos(porCiudad[ciudad]));
 }
 
-titulo("UNIDADES POR PRODUCTO");
+console.log("");
+console.log("UNIDADES POR PRODUCTO");
+console.log("-".repeat(ancho));
 let porProducto = analitica.unidadesPorProducto(ventas);
 let productos = Object.keys(porProducto);
 for (let i = 0; i < productos.length; i++) {
   let producto = productos[i];
-  linea(producto, String(porProducto[producto]));
+  console.log(producto + ":", porProducto[producto]);
 }
 
-titulo("TOP 3 PRODUCTOS POR VALOR");
+console.log("");
+console.log("TOP 3 PRODUCTOS POR VALOR");
+console.log("-".repeat(ancho));
 let top = analitica.topProductosPorValor(ventas, 3);
 for (let i = 0; i < top.length; i++) {
-  linea(top[i].producto, pesos(top[i].valor));
+  console.log(top[i].producto + ":", pesos(top[i].valor));
 }
 
 function resumenDia(fecha) {
   let ventasDia = analitica.ventasDelDia(ventas, fecha);
-  titulo("RESUMEN DEL DÍA " + fecha);
-  linea("Ventas", String(ventasDia.length));
-  linea("Unidades vendidas", String(analitica.unidadesVendidas(ventasDia)));
-  linea("Total vendido", pesos(analitica.totalVendido(ventasDia)));
-  linea("Ticket promedio", pesos(analitica.ticketPromedio(ventasDia)));
+  console.log("");
+  console.log("RESUMEN DEL DÍA " + fecha);
+  console.log("-".repeat(ancho));
+  console.log("Ventas:", ventasDia.length);
+  console.log("Unidades vendidas:", analitica.unidadesVendidas(ventasDia));
+  console.log("Total vendido:", pesos(analitica.totalVendido(ventasDia)));
+  console.log("Ticket promedio:", pesos(analitica.ticketPromedio(ventasDia)));
 }
 
 resumenDia("2026-09-05");
 resumenDia("2026-09-07");
 
-titulo("CLIENTES RECURRENTES");
+console.log("");
+console.log("CLIENTES RECURRENTES");
+console.log("-".repeat(ancho));
 let clientes = analitica.clientesRecurrentes(ventas);
-linea("Cantidad", String(clientes.length));
+console.log("Cantidad:", clientes.length);
 if (clientes.length > 0) {
   let lista = [];
   let limite = 10;
@@ -104,57 +105,69 @@ if (clientes.length > 0) {
     muestra = muestra + lista[i];
   }
   if (clientes.length > 10) {
-    linea("Muestra (primeros 10)", muestra);
+    console.log("Muestra (primeros 10):", muestra);
   } else {
-    linea("Clientes", muestra);
+    console.log("Clientes:", muestra);
   }
 }
 
-titulo("PRODUCTO ESTRELLA POR CIUDAD");
+console.log("");
+console.log("PRODUCTO ESTRELLA POR CIUDAD");
+console.log("-".repeat(ancho));
 let estrellas = analitica.productoEstrellaPorCiudad(ventas);
 let nombresCiudades = Object.keys(estrellas);
 for (let i = 0; i < nombresCiudades.length; i++) {
   let ciudad = nombresCiudades[i];
-  linea(ciudad, estrellas[ciudad]);
+  console.log(ciudad + ":", estrellas[ciudad]);
 }
 
-titulo("COMBO DE REGALO (TARJETA $87.000)");
+console.log("");
+console.log("COMBO DE REGALO (TARJETA $87.000)");
+console.log("-".repeat(ancho));
 let combo = analitica.comboRegalo(catalogo, 87000);
 if (combo == null) {
-  linea("Productos", "Sin combinación");
+  console.log("Productos:", "Sin combinación");
 } else {
-  linea("Productos", combo.join(" + "));
+  console.log("Productos:", combo.join(" + "));
 }
 
-titulo("CLIENTE PARA CUPÓN DE REGRESO");
+console.log("");
+console.log("CLIENTE PARA CUPÓN DE REGRESO");
+console.log("-".repeat(ancho));
 let clienteUnico = analitica.primerClienteUnico(ventas);
 if (clienteUnico == null) {
-  linea("Primer cliente con una compra", "Ninguno");
+  console.log("Primer cliente con una compra:", "Ninguno");
 } else {
-  linea("Primer cliente con una compra", clienteUnico);
+  console.log("Primer cliente con una compra:", clienteUnico);
 }
 
-titulo("MEJOR SEMANA DE SEPTIEMBRE");
+console.log("");
+console.log("MEJOR SEMANA DE SEPTIEMBRE");
+console.log("-".repeat(ancho));
 let semana = analitica.mejorSemana(dias, 7);
 if (semana == null) {
-  linea("Resultado", "No hay suficientes días");
+  console.log("Resultado:", "No hay suficientes días");
 } else {
-  linea("Días", semana.diaInicio + "–" + (semana.diaInicio + 6));
-  linea("Total", pesos(semana.total * 1000));
+  let diasSemana = semana.diaInicio + "–" + (semana.diaInicio + 6);
+  console.log("Días:", diasSemana);
+  let totalSemana = pesos(semana.total * 1000);
+  console.log("Total:", totalSemana);
 }
 
-titulo("PAR MÁS CERCANO A PRESUPUESTO ($100.000)");
+console.log("");
+console.log("PAR MÁS CERCANO A PRESUPUESTO ($100.000)");
+console.log("-".repeat(ancho));
 let par = analitica.parMasCercano(catalogo, 100000);
 if (par == null) {
-  linea("Resultado", "No hay una combinación bajo el presupuesto");
+  console.log("Resultado:", "No hay una combinación bajo el presupuesto");
 } else {
   let precios = {};
   for (let i = 0; i < catalogo.length; i++) {
     precios[catalogo[i].producto] = catalogo[i].precio;
   }
   let total = precios[par[0]] + precios[par[1]];
-  linea("Productos", par.join(" + "));
-  linea("Total", pesos(total));
+  console.log("Productos:", par.join(" + "));
+  console.log("Total:", pesos(total));
 }
 
 console.log("");
